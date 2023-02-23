@@ -1,0 +1,28 @@
+* {
+	margin: 0;
+}
+
+#game {
+	width: 1600px;
+	height: 900px;
+	border: 1px solid black;
+}
+
+#teamMarker {
+	width: 25%;
+	height: 900px;
+	float: left;
+	box-sizing: border-box;
+	border-right: 1px solid black;
+}
+
+#gameBoard {
+	width: 75%;
+	height: 900px;
+	float: right;
+	box-sizing: border-box;
+}
+
+.team {
+	border-top: 1px solid black;
+}

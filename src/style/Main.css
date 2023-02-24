@@ -1,0 +1,32 @@
+* {
+	margin: 0;
+}
+
+body {
+	text-align: center;
+}
+
+#title {
+	font-size: 72px;
+	font-family: 'bm-dohyeon';
+	position: relative;
+	margin-top: 150px;
+}
+
+.mainImage {
+	position: relative;
+	margin: 70px auto 0 auto;
+	width: 370px;
+	height: 370px;
+}
+
+.mainImage img {
+	position: relative;
+	width: 330px;
+	height: 330px;
+}
+
+#startBtn {
+	position: relative;
+	font-size: 1.5rem;
+}

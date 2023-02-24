@@ -1,0 +1,31 @@
+* {
+	margin: 0;
+}
+
+body {
+	text-align: center;
+}
+
+.subTitle {
+	font-size: 65px;
+	position: relative;
+	margin-top: 250px;
+}
+
+#teamNum {
+	display: inline-block;
+}
+
+.teamInfoArea {
+	margin-top: 40px;
+}
+
+.teamInfoArea p {
+	font-size: 35px;
+	margin: 0 20px;
+}
+
+#nextBtn {
+	font-size: 1rem;
+	margin-top: 30px;
+}

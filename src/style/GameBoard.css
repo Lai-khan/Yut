@@ -3,6 +3,7 @@
 }
 
 #game {
+	margin: 20px auto;
 	width: 1600px;
 	height: 900px;
 	border: 1px solid black;
@@ -25,4 +26,12 @@
 
 .team {
 	border-top: 1px solid black;
+}
+
+#gameBoardSvg {
+	margin-right: 300px;
+}
+
+.small {
+	font-size: 8px;
 }

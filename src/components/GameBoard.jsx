@@ -6,12 +6,17 @@ import '../style/GameBoard.css';
 
 const GameBoard = () => {
 	// 게임판 각 칸
-	let center,end,	mo1,mo2,mo3,a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,d1,d2,d3,d4,e1,e2,e3,e4,e5,e6,e7,e8;
+	let center,end,mo1,mo2,mo3,a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,d1,d2,d3,d4,e1,e2,e3,e4,e5,e6,e7,e8;
 	// 각 칸별 갈 수 있는 칸
 	let movableSpace = new Map();
-
-	const teamNum = 6;
+	const teamNum = localStorage.getItem('teamNum');
 	const height = 900 / teamNum;
+
+	const statusBoard = () => {
+		for (let i = teamNum + 1; i <= 6; i++) {
+			document.getElementById(`team${i}`).remove();
+		}
+	};
 
 	const setGame = () => {
 		center = SVG('#center');
@@ -76,19 +81,20 @@ const GameBoard = () => {
 	};
 
 	useEffect(() => {
+		statusBoard();
 		setGame();
 	}, []);
 
 	return (
 		<div id='game'>
-			<div id='teamMarker'>
+			<div id='teamStatusBoard'>
 				<Grid container direction='column' justifyContent='space-between' alignItems='stretch'>
-					<Grid item className='team' style={{ height: height }}></Grid>
-					<Grid item className='team' style={{ height: height }}></Grid>
-					<Grid item className='team' style={{ height: height }}></Grid>
-					<Grid item className='team' style={{ height: height }}></Grid>
-					<Grid item className='team' style={{ height: height }}></Grid>
-					<Grid item className='team' style={{ height: height }}></Grid>
+					<Grid id='team1' item className='teamStatus' style={{ height: height }}></Grid>
+					<Grid id='team2' item className='teamStatus' style={{ height: height }}></Grid>
+					<Grid id='team3' item className='teamStatus' style={{ height: height }}></Grid>
+					<Grid id='team4' item className='teamStatus' style={{ height: height }}></Grid>
+					<Grid id='team5' item className='teamStatus' style={{ height: height }}></Grid>
+					<Grid id='team6' item className='teamStatus' style={{ height: height }}></Grid>
 				</Grid>
 			</div>
 			<div id='gameBoard'>

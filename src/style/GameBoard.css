@@ -9,7 +9,7 @@
 	border: 1px solid black;
 }
 
-#teamMarker {
+#teamStatusBoard {
 	width: 25%;
 	height: 900px;
 	float: left;
@@ -24,7 +24,7 @@
 	box-sizing: border-box;
 }
 
-.team {
+.teamStatus {
 	border-top: 1px solid black;
 }
 

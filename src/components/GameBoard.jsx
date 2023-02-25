@@ -43,6 +43,36 @@ const GameBoard = () => {
 		e6 = SVG('#e6');
 		e7 = SVG('#e7');
 		e8 = SVG('#e8');
+
+		movableSpace.set('start', [a1, a2, a3, a4, mo1]);
+		movableSpace.set(center, [e2, e4, e7, e8, end]);
+		movableSpace.set(mo1, [a4, e1, e2, center, e5, e6]);
+		movableSpace.set(mo2, [b4, e3, e4, center, e7, e8]);
+		movableSpace.set(mo3, [c4, e6, d1, d2, d3, d4, end]);
+		movableSpace.set(a1, [end, a2, a3, a4, mo1, b1]);
+		movableSpace.set(a2, [a1, a3, a4, mo1, b1, b2]);
+		movableSpace.set(a3, [a2, a4, mo1, b1, b2, b3]);
+		movableSpace.set(a4, [a3, mo1, b1, b2, b3, b4]);
+		movableSpace.set(b1, [mo1, b2, b3, b4, mo2, c1]);
+		movableSpace.set(b2, [b1, b3, b4, mo2, c1, c2]);
+		movableSpace.set(b3, [b2, b4, mo2, c1, c2, c3]);
+		movableSpace.set(b4, [b3, mo2, c1, c2, c3, c4]);
+		movableSpace.set(c1, [mo2, c2, c3, c4, mo3, d1]);
+		movableSpace.set(c2, [c1, c3, c4, mo3, d1, d2]);
+		movableSpace.set(c3, [c2, c4, mo3, d1, d2, d3]);
+		movableSpace.set(c4, [c3, mo3, d1, d2, d3, d4]);
+		movableSpace.set(d1, [mo3, d2, d3, d4, end]);
+		movableSpace.set(d2, [d1, d3, d4, end]);
+		movableSpace.set(d3, [d2, d4, end]);
+		movableSpace.set(d4, [d3, end]);
+		movableSpace.set(e1, [mo1, e2, center, e5, e6, mo3]);
+		movableSpace.set(e2, [e1, center, e5, e6, mo3, d1]);
+		movableSpace.set(e3, [mo2, e4, center, e7, e8, end]);
+		movableSpace.set(e4, [e3, center, e7, e8, end]);
+		movableSpace.set(e5, [center, e6, mo3, d1, d2, d3]);
+		movableSpace.set(e6, [e5, mo3, d1, d2, d3, d4]);
+		movableSpace.set(e7, [center, e8, end]);
+		movableSpace.set(e8, [e7, end]);
 	};
 
 	useEffect(() => {

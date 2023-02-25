@@ -10,13 +10,7 @@ const GameBoard = () => {
 	// 각 칸별 갈 수 있는 칸
 	let movableSpace = new Map();
 	const teamNum = localStorage.getItem('teamNum');
-	const height = 900 / teamNum;
-
-	const statusBoard = () => {
-		for (let i = teamNum + 1; i <= 6; i++) {
-			document.getElementById(`team${i}`).remove();
-		}
-	};
+	const height = 150;
 
 	const setGame = () => {
 		center = SVG('#center');
@@ -81,7 +75,7 @@ const GameBoard = () => {
 	};
 
 	useEffect(() => {
-		statusBoard();
+		console.log(teamNum, height)
 		setGame();
 	}, []);
 
@@ -91,10 +85,10 @@ const GameBoard = () => {
 				<Grid container direction='column' justifyContent='space-between' alignItems='stretch'>
 					<Grid id='team1' item className='teamStatus' style={{ height: height }}></Grid>
 					<Grid id='team2' item className='teamStatus' style={{ height: height }}></Grid>
-					<Grid id='team3' item className='teamStatus' style={{ height: height }}></Grid>
-					<Grid id='team4' item className='teamStatus' style={{ height: height }}></Grid>
-					<Grid id='team5' item className='teamStatus' style={{ height: height }}></Grid>
-					<Grid id='team6' item className='teamStatus' style={{ height: height }}></Grid>
+					{teamNum >= 3 && <Grid id='team3' item className='teamStatus' style={{ height: height }}></Grid>}
+					{teamNum >= 4 && <Grid id='team4' item className='teamStatus' style={{ height: height }}></Grid>}
+					{teamNum >= 5 && <Grid id='team5' item className='teamStatus' style={{ height: height }}></Grid>}
+					{teamNum >= 6 && <Grid id='team6' item className='teamStatus' style={{ height: height }}></Grid>}
 				</Grid>
 			</div>
 			<div id='gameBoard'>

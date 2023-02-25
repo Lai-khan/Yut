@@ -38,3 +38,27 @@
 .small {
 	font-size: 8px;
 }
+
+.bird {
+	filter: drop-shadow(0px 0px 1.5px red);
+}
+
+.hippo {
+	filter: drop-shadow(0px 0px 1.5px orange);
+}
+
+.dragon {
+	filter: drop-shadow(0px 0px 1.5px yellow);
+}
+
+.cat {
+	filter: drop-shadow(0px 0px 1.5px green);
+}
+
+.horse {
+	filter: drop-shadow(0px 0px 1.5px violet);
+}
+
+.fish {
+	filter: drop-shadow(0px 0px 1.5px blue);
+}

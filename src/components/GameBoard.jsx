@@ -205,6 +205,54 @@ const GameBoard = () => {
 					<text x='63' y='310' className='small'>
 						도착
 					</text>
+
+					{/* 말 */}
+					<defs>
+						<pattern id='birdPattern' x='0' y='0' width='24' height='24'>
+							<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
+						</pattern>
+						<symbol id='bird' viewBox='0 0 20 20'>
+							<rect height='20' width='20' fill='url(#birdPattern)' />
+						</symbol>
+						<pattern id='hippoPattern' x='0' y='0' width='24' height='24'>
+							<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
+						</pattern>
+						<symbol id='hippo' viewBox='0 0 20 20'>
+							<rect height='20' width='20' fill='url(#hippoPattern)' />
+						</symbol>
+						<pattern id='dragonPattern' x='0' y='0' width='24' height='24'>
+							<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
+						</pattern>
+						<symbol id='dragon' viewBox='0 0 20 20'>
+							<rect height='20' width='20' fill='url(#dragonPattern)' />
+						</symbol>
+						<pattern id='catPattern' x='0' y='0' width='24' height='24'>
+							<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
+						</pattern>
+						<symbol id='cat' viewBox='0 0 20 20'>
+							<rect height='20' width='20' fill='url(#catPattern)' />
+						</symbol>
+						<pattern id='horsePattern' x='0' y='0' width='24' height='24'>
+							<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
+						</pattern>
+						<symbol id='horse' viewBox='0 0 20 20'>
+							<rect height='20' width='20' fill='url(#horsePattern)' />
+						</symbol>
+						<pattern id='fishPattern' x='0' y='0' width='24' height='24'>
+							<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
+						</pattern>
+						<symbol id='fish' viewBox='0 0 20 20'>
+							<rect height='20' width='20' fill='url(#fishPattern)' />
+						</symbol>
+					</defs>
+
+					{/* 말 놓기 예시 */}
+					<use class='bird' x='188' y='188' width='24' height='24' href='#bird'></use>
+					<use class='hippo' x='43' y='43' width='24' height='24' href='#hippo'></use>
+					<use class='dragon' x='333' y='43' width='24' height='24' href='#dragon'></use>
+					<use class='cat' x='43' y='333' width='24' height='24' href='#cat'></use>
+					<use class='horse' x='333' y='333' width='24' height='24' href='#horse'></use>
+					<use class='fish' x='93' y='283' width='24' height='24' href='#fish'></use>
 				</svg>
 			</div>
 		</div>

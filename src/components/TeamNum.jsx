@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -7,6 +7,10 @@ import '../style/TeamNum.css';
 
 const TeamNum = () => {
 	const [teamNum, setTeamNum] = useState(2);
+
+	useEffect(() => {
+		localStorage.setItem('teamNum', teamNum);
+	}, [teamNum]);
 
 	return (
 		<div>
@@ -19,10 +23,9 @@ const TeamNum = () => {
 						size='large'
 						onClick={() => {
 							if (teamNum > 2) {
-								setTeamNum(teamNum - 1);
+								setTeamNum((prevNum) => prevNum + 1);
 							}
-						}}
-					>
+						}}>
 						<RemoveIcon />
 					</IconButton>
 					<p id='teamNum'>{teamNum}</p>
@@ -32,10 +35,9 @@ const TeamNum = () => {
 						size='large'
 						onClick={() => {
 							if (teamNum < 6) {
-								setTeamNum(teamNum + 1);
+								setTeamNum((prevNum) => prevNum + 1);
 							}
-						}}
-					>
+						}}>
 						<AddIcon />
 					</IconButton>
 				</Box>

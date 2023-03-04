@@ -3,17 +3,18 @@
 }
 
 #game {
+	margin: 20px auto;
 	width: 1600px;
 	height: 900px;
-	border: 1px solid black;
+	border-top: 1px solid black;
+	border-right: 1px solid black;
 }
 
-#teamMarker {
+#teamStatusBoard {
 	width: 25%;
 	height: 900px;
 	float: left;
 	box-sizing: border-box;
-	border-right: 1px solid black;
 }
 
 #gameBoard {
@@ -21,8 +22,43 @@
 	height: 900px;
 	float: right;
 	box-sizing: border-box;
+	border-left: 1px solid black;
+	border-bottom: 1px solid black;
 }
 
-.team {
-	border-top: 1px solid black;
+.teamStatus {
+	border-left: 1px solid black;
+	border-bottom: 1px solid black;
+}
+
+#gameBoardSvg {
+	margin-right: 300px;
+}
+
+.small {
+	font-size: 8px;
+}
+
+.bird {
+	filter: drop-shadow(0px 0px 1.5px red);
+}
+
+.hippo {
+	filter: drop-shadow(0px 0px 1.5px orange);
+}
+
+.dragon {
+	filter: drop-shadow(0px 0px 1.5px yellow);
+}
+
+.cat {
+	filter: drop-shadow(0px 0px 1.5px green);
+}
+
+.horse {
+	filter: drop-shadow(0px 0px 1.5px violet);
+}
+
+.fish {
+	filter: drop-shadow(0px 0px 1.5px blue);
 }

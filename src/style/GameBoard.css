@@ -4,61 +4,40 @@
 
 #game {
 	margin: 20px auto;
-	width: 1600px;
+	width: 1300px;
 	height: 900px;
-	border-top: 1px solid black;
-	border-right: 1px solid black;
-}
-
-#teamStatusBoard {
-	width: 25%;
-	height: 900px;
-	float: left;
-	box-sizing: border-box;
-}
-
-#gameBoard {
-	width: 75%;
-	height: 900px;
-	float: right;
-	box-sizing: border-box;
-	border-left: 1px solid black;
-	border-bottom: 1px solid black;
-}
-
-.teamStatus {
-	border-left: 1px solid black;
-	border-bottom: 1px solid black;
-}
-
-#gameBoardSvg {
-	margin-right: 300px;
+	border: 2px solid black;
 }
 
 .small {
 	font-size: 8px;
 }
 
+.middle {
+	font-size: 16px;
+	font-weight: bold;
+  }
+
 .bird {
-	filter: drop-shadow(0px 0px 2px red);
+	filter: drop-shadow(0px 0px 1.5px red);
 }
 
 .hippo {
-	filter: drop-shadow(0px 0px 2px orange);
+	filter: drop-shadow(0px 0px 1.5px orange);
 }
 
 .dragon {
-	filter: drop-shadow(0px 0px 2px yellow);
+	filter: drop-shadow(0px 0px 1.5px yellow);
 }
 
 .cat {
-	filter: drop-shadow(0px 0px 2px green);
+	filter: drop-shadow(0px 0px 1.5px green);
 }
 
 .horse {
-	filter: drop-shadow(0px 0px 2px violet);
+	filter: drop-shadow(0px 0px 1.5px blue);
 }
 
 .fish {
-	filter: drop-shadow(0px 0px 2px blue);
+	filter: drop-shadow(0px 0px 2px purple);
 }

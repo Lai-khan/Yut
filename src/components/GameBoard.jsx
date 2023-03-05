@@ -74,7 +74,8 @@ const GameBoard = () => {
 		spaceInfo.set('end', { minX: 19, minY: 309, maxX: 67, maxY: 357, sx: 43, sy: 333 });
 	};
 
-	const malMove = (posId, x, y) => {
+	const malMove = (dataset, x, y) => {
+		const posId = dataset.pos;
 		const movable = movableSpace.get(posId);
 
 		const len = movable.length;
@@ -91,17 +92,21 @@ const GameBoard = () => {
 			arrival = posId;
 		}
 
+		if (arrival === 'start') {
+			return { sx: dataset.beginX, sy: dataset.beginY, nextPos: arrival };
+		}
+
 		const { sx, sy } = spaceInfo.get(arrival);
 		return { sx, sy, nextPos: arrival };
 	};
 
-	useEffect(() => {
-		setGame();
+	const setDraggable = async (id) => {
+		const element = await SVG(`#${id}`);
+		console.log(element);
 
-		let dragExample = SVG('#drag_example');
-		dragExample.draggable();
+		element.draggable();
 
-		dragExample.on('dragstart', (e) => {
+		element.on('dragstart', (e) => {
 			const posId = e.target.dataset.pos;
 			const movable = movableSpace.get(posId);
 
@@ -111,7 +116,7 @@ const GameBoard = () => {
 			});
 		});
 
-		dragExample.on('dragend', (e) => {
+		element.on('dragend', (e) => {
 			e.preventDefault();
 			const posId = e.target.dataset.pos;
 
@@ -122,10 +127,21 @@ const GameBoard = () => {
 			});
 
 			const { handler, box } = e.detail;
-			const { sx, sy, nextPos } = malMove(posId, box.x, box.y);
+			const { sx, sy, nextPos } = malMove(e.target.dataset, box.x, box.y);
 			handler.move(sx, sy);
 			e.target.dataset.pos = nextPos;
 		});
+	};
+
+	useEffect(() => {
+		setGame();
+
+		const pieces = document.getElementsByClassName('team1');
+		const len = pieces.length;
+		for (var i = 0; i < len; i++) {
+			console.log(pieces[i].id);
+			setDraggable(pieces[i].id);
+		}
 
 		window.addEventListener('beforeunload', (e) => {
 			e.preventDefault();
@@ -255,71 +271,71 @@ const GameBoard = () => {
 					도착
 				</text>
 
-				<line x1='400' y1='0' x2='400' y2='400' stroke='black' stroke-width='1' />
+				<line x1='400' y1='0' x2='400' y2='400' stroke='black' strokeWidth='1' />
 
 				{/* 현황판 */}
-				<rect x='400' y='0' width='178' height='66.66' stroke='black' fill='none' stroke-width='0.2' />
-				<text x='405' y='20' class='middle'>
+				<rect x='400' y='0' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
+				<text x='405' y='20' className='middle'>
 					1팀
 				</text>
-				<circle cx='430' cy='45' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-				<circle cx='470' cy='45' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-				<circle cx='510' cy='45' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-				<circle cx='550' cy='45' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-				<rect x='400' y='66.66' width='178' height='66.66' stroke='black' fill='none' stroke-width='0.2' />
-				<text x='405' y='86.66' class='middle'>
+				<circle cx='430' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle cx='470' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle cx='510' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle cx='550' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<rect x='400' y='66.66' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
+				<text x='405' y='86.66' className='middle'>
 					2팀
 				</text>
-				<circle cx='430' cy='111.66' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-				<circle cx='470' cy='111.66' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-				<circle cx='510' cy='111.66' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-				<circle cx='550' cy='111.66' r='12' stroke='gray' stroke-width='1.5' fill='none' />
+				<circle cx='430' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle cx='470' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle cx='510' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle cx='550' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 				{teamNum >= 3 && (
 					<>
-						<rect x='400' y='133.32' width='178' height='66.66' stroke='black' fill='none' stroke-width='0.2' />
-						<text x='405' y='153.32' class='middle'>
+						<rect x='400' y='133.32' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
+						<text x='405' y='153.32' className='middle'>
 							3팀
 						</text>
-						<circle cx='430' cy='178.32' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='470' cy='178.32' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='510' cy='178.32' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='550' cy='178.32' r='12' stroke='gray' stroke-width='1.5' fill='none' />
+						<circle cx='430' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='470' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='510' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='550' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 				{teamNum >= 4 && (
 					<>
-						<rect x='400' y='199.98' width='178' height='66.66' stroke='black' fill='none' stroke-width='0.2' />
-						<text x='405' y='219.98' class='middle'>
+						<rect x='400' y='199.98' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
+						<text x='405' y='219.98' className='middle'>
 							4팀
 						</text>
-						<circle cx='430' cy='244.98' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='470' cy='244.98' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='510' cy='244.98' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='550' cy='244.98' r='12' stroke='gray' stroke-width='1.5' fill='none' />
+						<circle cx='430' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='470' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='510' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='550' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 				{teamNum >= 5 && (
 					<>
-						<rect x='400' y='266.64' width='178' height='66.66' stroke='black' fill='none' stroke-width='0.2' />
-						<text x='405' y='286.64' class='middle'>
+						<rect x='400' y='266.64' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
+						<text x='405' y='286.64' className='middle'>
 							5팀
 						</text>
-						<circle cx='430' cy='311.64' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='470' cy='311.64' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='510' cy='311.64' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='550' cy='311.64' r='12' stroke='gray' stroke-width='1.5' fill='none' />
+						<circle cx='430' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='470' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='510' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='550' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 				{teamNum >= 6 && (
 					<>
-						<rect x='400' y='333.3' width='178' height='66.66' stroke='black' fill='none' stroke-width='0.2' />
-						<text x='405' y='353.3' class='middle'>
+						<rect x='400' y='333.3' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
+						<text x='405' y='353.3' className='middle'>
 							6팀
 						</text>
-						<circle cx='430' cy='378.3' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='470' cy='378.3' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='510' cy='378.3' r='12' stroke='gray' stroke-width='1.5' fill='none' />
-						<circle cx='550' cy='378.3' r='12' stroke='gray' stroke-width='1.5' fill='none' />
+						<circle cx='430' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='470' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='510' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle cx='550' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 
@@ -363,58 +379,286 @@ const GameBoard = () => {
 					</symbol>
 				</defs>
 
-				<use data-pos='start' className='bird' x='418' y='33' width='24' height='24' href='#bird'></use>
-				<use data-pos='start' className='bird' x='458' y='33' width='24' height='24' href='#bird'></use>
-				<use data-pos='start' className='bird' x='498' y='33' width='24' height='24' href='#bird'></use>
-				<use data-pos='start' className='bird' x='538' y='33' width='24' height='24' href='#bird'></use>
-				<use data-pos='start' className='hippo' x='418' y='99.66' width='24' height='24' href='#hippo'></use>
-				<use data-pos='start' className='hippo' x='458' y='99.66' width='24' height='24' href='#hippo'></use>
-				<use data-pos='start' className='hippo' x='498' y='99.66' width='24' height='24' href='#hippo'></use>
-				<use data-pos='start' className='hippo' x='538' y='99.66' width='24' height='24' href='#hippo'></use>
+				<use
+					id='team1-1'
+					data-pos='start'
+					data-beginX='418'
+					data-beginY='33'
+					className='bird team1'
+					x='418'
+					y='33'
+					width='24'
+					height='24'
+					href='#bird'></use>
+				<use
+					id='team1-2'
+					data-pos='start'
+					data-beginX='458'
+					data-beginY='33'
+					className='bird team1'
+					x='458'
+					y='33'
+					width='24'
+					height='24'
+					href='#bird'></use>
+				<use
+					id='team1-3'
+					data-pos='start'
+					data-beginX='498'
+					data-beginY='33'
+					className='bird team1'
+					x='498'
+					y='33'
+					width='24'
+					height='24'
+					href='#bird'></use>
+				<use
+					id='team1-4'
+					data-pos='start'
+					data-beginX='538'
+					data-beginY='33'
+					className='bird team1'
+					x='538'
+					y='33'
+					width='24'
+					height='24'
+					href='#bird'></use>
+				<use
+					id='team2-1'
+					data-pos='start'
+					data-beginX='418'
+					data-beginY='99.66'
+					className='hippo team2'
+					x='418'
+					y='99.66'
+					width='24'
+					height='24'
+					href='#hippo'></use>
+				<use
+					id='team2-2'
+					data-pos='start'
+					data-beginX='458'
+					data-beginY='99.66'
+					className='hippo team2'
+					x='458'
+					y='99.66'
+					width='24'
+					height='24'
+					href='#hippo'></use>
+				<use
+					id='team2-3'
+					data-pos='start'
+					data-beginX='498'
+					data-beginY='99.66'
+					className='hippo team2'
+					x='498'
+					y='99.66'
+					width='24'
+					height='24'
+					href='#hippo'></use>
+				<use
+					id='team2-4'
+					data-pos='start'
+					data-beginX='538'
+					data-beginY='99.66'
+					className='hippo team2'
+					x='538'
+					y='99.66'
+					width='24'
+					height='24'
+					href='#hippo'></use>
 				{teamNum >= 3 && (
 					<>
-						<use data-pos='start' className='dragon' x='418' y='166.32' width='24' height='24' href='#dragon'></use>
-						<use data-pos='start' className='dragon' x='458' y='166.32' width='24' height='24' href='#dragon'></use>
-						<use data-pos='start' className='dragon' x='498' y='166.32' width='24' height='24' href='#dragon'></use>
-						<use data-pos='start' className='dragon' x='538' y='166.32' width='24' height='24' href='#dragon'></use>
+						<use
+							id='team3-1'
+							data-pos='start'
+							data-beginX='418'
+							data-beginY='166.32'
+							className='dragon team3'
+							x='418'
+							y='166.32'
+							width='24'
+							height='24'
+							href='#dragon'></use>
+						<use
+							id='team3-2'
+							data-pos='start'
+							data-beginX='458'
+							data-beginY='166.32'
+							className='dragon team3'
+							x='458'
+							y='166.32'
+							width='24'
+							height='24'
+							href='#dragon'></use>
+						<use
+							id='team3-3'
+							data-pos='start'
+							data-beginX='498'
+							data-beginY='166.32'
+							className='dragon team3'
+							x='498'
+							y='166.32'
+							width='24'
+							height='24'
+							href='#dragon'></use>
+						<use
+							id='team3-4'
+							data-pos='start'
+							data-beginX='538'
+							data-beginY='166.32'
+							className='dragon team3'
+							x='538'
+							y='166.32'
+							width='24'
+							height='24'
+							href='#dragon'></use>
 					</>
 				)}
 				{teamNum >= 4 && (
 					<>
-						<use data-pos='start' className='cat' x='418' y='232.98' width='24' height='24' href='#cat'></use>
-						<use data-pos='start' className='cat' x='458' y='232.98' width='24' height='24' href='#cat'></use>
-						<use data-pos='start' className='cat' x='498' y='232.98' width='24' height='24' href='#cat'></use>
-						<use data-pos='start' className='cat' x='538' y='232.98' width='24' height='24' href='#cat'></use>
+						<use
+							id='team4-1'
+							data-pos='start'
+							data-beginX='418'
+							data-beginY='232.98'
+							className='cat team4'
+							x='418'
+							y='232.98'
+							width='24'
+							height='24'
+							href='#cat'></use>
+						<use
+							id='team4-2'
+							data-pos='start'
+							data-beginX='458'
+							data-beginY='232.98'
+							className='cat team4'
+							x='458'
+							y='232.98'
+							width='24'
+							height='24'
+							href='#cat'></use>
+						<use
+							id='team4-3'
+							data-pos='start'
+							data-beginX='498'
+							data-beginY='232.98'
+							className='cat team4'
+							x='498'
+							y='232.98'
+							width='24'
+							height='24'
+							href='#cat'></use>
+						<use
+							id='team4-4'
+							data-pos='start'
+							data-beginX='538'
+							data-beginY='232.98'
+							className='cat team4'
+							x='538'
+							y='232.98'
+							width='24'
+							height='24'
+							href='#cat'></use>
 					</>
 				)}
 				{teamNum >= 5 && (
 					<>
-						<use data-pos='start' className='horse' x='418' y='299.64' width='24' height='24' href='#horse'></use>
-						<use data-pos='start' className='horse' x='458' y='299.64' width='24' height='24' href='#horse'></use>
-						<use data-pos='start' className='horse' x='498' y='299.64' width='24' height='24' href='#horse'></use>
-						<use data-pos='start' className='horse' x='538' y='299.64' width='24' height='24' href='#horse'></use>
+						<use
+							id='team5-1'
+							data-pos='start'
+							data-beginX='418'
+							data-beginY='299.64'
+							className='horse team5'
+							x='418'
+							y='299.64'
+							width='24'
+							height='24'
+							href='#horse'></use>
+						<use
+							id='team5-2'
+							data-pos='start'
+							data-beginX='458'
+							data-beginY='299.64'
+							className='horse team5'
+							x='458'
+							y='299.64'
+							width='24'
+							height='24'
+							href='#horse'></use>
+						<use
+							id='team5-3'
+							data-pos='start'
+							data-beginX='498'
+							data-beginY='299.64'
+							className='horse team5'
+							x='498'
+							y='299.64'
+							width='24'
+							height='24'
+							href='#horse'></use>
+						<use
+							id='team5-4'
+							data-pos='start'
+							data-beginX='538'
+							data-beginY='299.64'
+							className='horse team5'
+							x='538'
+							y='299.64'
+							width='24'
+							height='24'
+							href='#horse'></use>
 					</>
 				)}
 				{teamNum >= 6 && (
 					<>
-						<use data-pos='start' className='fish' x='418' y='366.3' width='24' height='24' href='#fish'></use>
-						<use data-pos='start' className='fish' x='458' y='366.3' width='24' height='24' href='#fish'></use>
-						<use data-pos='start' className='fish' x='498' y='366.3' width='24' height='24' href='#fish'></use>
-						<use data-pos='start' className='fish' x='538' y='366.3' width='24' height='24' href='#fish'></use>
+						<use
+							id='team6-1'
+							data-pos='start'
+							data-beginX='418'
+							data-beginY='366.3'
+							className='fish team6'
+							x='418'
+							y='366.3'
+							width='24'
+							height='24'
+							href='#fish'></use>
+						<use
+							id='team6-2'
+							data-pos='start'
+							data-beginX='458'
+							data-beginY='366.3'
+							className='fish team6'
+							x='458'
+							y='366.3'
+							width='24'
+							height='24'
+							href='#fish'></use>
+						<use
+							id='team6-3'
+							data-pos='start'
+							data-beginX='498'
+							data-beginY='366.3'
+							className='fish team6'
+							x='498'
+							y='366.3'
+							width='24'
+							height='24'
+							href='#fish'></use>
+						<use
+							id='team6-4'
+							data-pos='start'
+							data-beginX='538'
+							data-beginY='366.3'
+							className='fish team6'
+							x='538'
+							y='366.3'
+							width='24'
+							height='24'
+							href='#fish'></use>
 					</>
 				)}
-
-				{/* 말 놓기 예시 */}
-				{/* 200 -> 188, 55 -> 43, 345 -> 333, 105 -> 93.  좌표값 = (x-12, y-12) */}
-				<use
-					id='drag_example'
-					data-pos='center'
-					className='bird'
-					x='188'
-					y='188'
-					width='24'
-					height='24'
-					href='#bird'></use>
 			</svg>
 		</div>
 	);

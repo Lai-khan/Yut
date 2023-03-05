@@ -1,82 +1,142 @@
 import React, { useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import { SVG } from '@svgdotjs/svg.js';
+import '@svgdotjs/svg.draggable.js';
 
 import '../style/GameBoard.css';
 
 const GameBoard = () => {
-	// 게임판 각 칸
-	let center,end,mo1,mo2,mo3,a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,d1,d2,d3,d4,e1,e2,e3,e4,e5,e6,e7,e8;
 	// 각 칸별 갈 수 있는 칸
 	let movableSpace = new Map();
+	let spaceInfo = new Map();
 	const teamNum = localStorage.getItem('teamNum');
 	const height = 150;
 
 	const setGame = () => {
-		center = SVG('#center');
-		end = SVG('#end');
-		mo1 = SVG('#mo1');
-		mo2 = SVG('#mo2');
-		mo3 = SVG('#mo3');
-		a1 = SVG('#a1');
-		a2 = SVG('#a2');
-		a3 = SVG('#a3');
-		a4 = SVG('#a4');
-		b1 = SVG('#b1');
-		b2 = SVG('#b2');
-		b3 = SVG('#b3');
-		b4 = SVG('#b4');
-		c1 = SVG('#c1');
-		c2 = SVG('#c2');
-		c3 = SVG('#c3');
-		c4 = SVG('#c4');
-		d1 = SVG('#d1');
-		d2 = SVG('#d2');
-		d3 = SVG('#d3');
-		d4 = SVG('#d4');
-		e1 = SVG('#e1');
-		e2 = SVG('#e2');
-		e3 = SVG('#e3');
-		e4 = SVG('#e4');
-		e5 = SVG('#e5');
-		e6 = SVG('#e6');
-		e7 = SVG('#e7');
-		e8 = SVG('#e8');
+		movableSpace.set('start', ['a1', 'a2', 'a3', 'a4', 'mo1']);
+		movableSpace.set('center', ['e2', 'e4', 'e7', 'e8', 'end']);
+		movableSpace.set('mo1', ['a4', 'e1', 'e2', 'center', 'e5', 'e6']);
+		movableSpace.set('mo2', ['b4', 'e3', 'e4', 'center', 'e7', 'e8']);
+		movableSpace.set('mo3', ['c4', 'e6', 'd1', 'd2', 'd3', 'd4', 'end']);
+		movableSpace.set('a1', ['end', 'a2', 'a3', 'a4', 'mo1', 'b1']);
+		movableSpace.set('a2', ['a1', 'a3', 'a4', 'mo1', 'b1', 'b2']);
+		movableSpace.set('a3', ['a2', 'a4', 'mo1', 'b1', 'b2', 'b3']);
+		movableSpace.set('a4', ['a3', 'mo1', 'b1', 'b2', 'b3', 'b4']);
+		movableSpace.set('b1', ['mo1', 'b2', 'b3', 'b4', 'mo2', 'c1']);
+		movableSpace.set('b2', ['b1', 'b3', 'b4', 'mo2', 'c1', 'c2']);
+		movableSpace.set('b3', ['b2', 'b4', 'mo2', 'c1', 'c2', 'c3']);
+		movableSpace.set('b4', ['b3', 'mo2', 'c1', 'c2', 'c3', 'c4']);
+		movableSpace.set('c1', ['mo2', 'c2', 'c3', 'c4', 'mo3', 'd1']);
+		movableSpace.set('c2', ['c1', 'c3', 'c4', 'mo3', 'd1', 'd2']);
+		movableSpace.set('c3', ['c2', 'c4', 'mo3', 'd1', 'd2', 'd3']);
+		movableSpace.set('c4', ['c3', 'mo3', 'd1', 'd2', 'd3', 'd4']);
+		movableSpace.set('d1', ['mo3', 'd2', 'd3', 'd4', 'end']);
+		movableSpace.set('d2', ['d1', 'd3', 'd4', 'end']);
+		movableSpace.set('d3', ['d2', 'd4', 'end']);
+		movableSpace.set('d4', ['d3', 'end']);
+		movableSpace.set('e1', ['mo1', 'e2', 'center', 'e5', 'e6', 'mo3']);
+		movableSpace.set('e2', ['e1', 'center', 'e5', 'e6', 'mo3', 'd1']);
+		movableSpace.set('e3', ['mo2', 'e4', 'center', 'e7', 'e8', 'end']);
+		movableSpace.set('e4', ['e3', 'center', 'e7', 'e8', 'end']);
+		movableSpace.set('e5', ['center', 'e6', 'mo3', 'd1', 'd2', 'd3']);
+		movableSpace.set('e6', ['e5', 'mo3', 'd1', 'd2', 'd3', 'd4']);
+		movableSpace.set('e7', ['center', 'e8', 'end']);
+		movableSpace.set('e8', ['e7', 'end']);
+		movableSpace.set('end', ['d4', 'e8']);
 
-		movableSpace.set('start', [a1, a2, a3, a4, mo1]);
-		movableSpace.set(center, [e2, e4, e7, e8, end]);
-		movableSpace.set(mo1, [a4, e1, e2, center, e5, e6]);
-		movableSpace.set(mo2, [b4, e3, e4, center, e7, e8]);
-		movableSpace.set(mo3, [c4, e6, d1, d2, d3, d4, end]);
-		movableSpace.set(a1, [end, a2, a3, a4, mo1, b1]);
-		movableSpace.set(a2, [a1, a3, a4, mo1, b1, b2]);
-		movableSpace.set(a3, [a2, a4, mo1, b1, b2, b3]);
-		movableSpace.set(a4, [a3, mo1, b1, b2, b3, b4]);
-		movableSpace.set(b1, [mo1, b2, b3, b4, mo2, c1]);
-		movableSpace.set(b2, [b1, b3, b4, mo2, c1, c2]);
-		movableSpace.set(b3, [b2, b4, mo2, c1, c2, c3]);
-		movableSpace.set(b4, [b3, mo2, c1, c2, c3, c4]);
-		movableSpace.set(c1, [mo2, c2, c3, c4, mo3, d1]);
-		movableSpace.set(c2, [c1, c3, c4, mo3, d1, d2]);
-		movableSpace.set(c3, [c2, c4, mo3, d1, d2, d3]);
-		movableSpace.set(c4, [c3, mo3, d1, d2, d3, d4]);
-		movableSpace.set(d1, [mo3, d2, d3, d4, end]);
-		movableSpace.set(d2, [d1, d3, d4, end]);
-		movableSpace.set(d3, [d2, d4, end]);
-		movableSpace.set(d4, [d3, end]);
-		movableSpace.set(e1, [mo1, e2, center, e5, e6, mo3]);
-		movableSpace.set(e2, [e1, center, e5, e6, mo3, d1]);
-		movableSpace.set(e3, [mo2, e4, center, e7, e8, end]);
-		movableSpace.set(e4, [e3, center, e7, e8, end]);
-		movableSpace.set(e5, [center, e6, mo3, d1, d2, d3]);
-		movableSpace.set(e6, [e5, mo3, d1, d2, d3, d4]);
-		movableSpace.set(e7, [center, e8, end]);
-		movableSpace.set(e8, [e7, end]);
+		spaceInfo.set('center', { minX: 164, minY: 164, maxX: 212, maxY: 212, sx: 188, sy: 188 });
+		spaceInfo.set('mo1', { minX: 309, minY: 309, maxX: 357, maxY: 357, sx: 333, sy: 333 });
+		spaceInfo.set('mo2', { minX: 309, minY: 19, maxX: 357, maxY: 67, sx: 333, sy: 43 });
+		spaceInfo.set('mo3', { minX: 19, minY: 19, maxX: 67, maxY: 67, sx: 43, sy: 43 });
+		spaceInfo.set('a1', { minX: 73, minY: 309, maxX: 131, maxY: 357, sx: 107, sy: 333 });
+		spaceInfo.set('a2', { minX: 137, minY: 309, maxX: 185, maxY: 357, sx: 161, sy: 333 });
+		spaceInfo.set('a3', { minX: 191, minY: 309, maxX: 239, maxY: 357, sx: 215, sy: 333 });
+		spaceInfo.set('a4', { minX: 245, minY: 309, maxX: 293, maxY: 357, sx: 269, sy: 333 });
+		spaceInfo.set('b1', { minX: 309, minY: 73, maxX: 357, maxY: 131, sx: 333, sy: 107 });
+		spaceInfo.set('b2', { minX: 309, minY: 137, maxX: 357, maxY: 185, sx: 333, sy: 161 });
+		spaceInfo.set('b3', { minX: 309, minY: 191, maxX: 357, maxY: 239, sx: 333, sy: 215 });
+		spaceInfo.set('b4', { minX: 309, minY: 245, maxX: 357, maxY: 293, sx: 333, sy: 269 });
+		spaceInfo.set('c1', { minX: 73, minY: 19, maxX: 131, maxY: 67, sx: 107, sy: 43 });
+		spaceInfo.set('c2', { minX: 137, minY: 19, maxX: 185, maxY: 67, sx: 161, sy: 43 });
+		spaceInfo.set('c3', { minX: 191, minY: 19, maxX: 239, maxY: 67, sx: 215, sy: 43 });
+		spaceInfo.set('c4', { minX: 245, minY: 19, maxX: 293, maxY: 67, sx: 269, sy: 43 });
+		spaceInfo.set('d1', { minX: 19, minY: 73, maxX: 67, maxY: 131, sx: 43, sy: 107 });
+		spaceInfo.set('d2', { minX: 19, minY: 137, maxX: 67, maxY: 185, sx: 43, sy: 161 });
+		spaceInfo.set('d3', { minX: 19, minY: 191, maxX: 67, maxY: 239, sx: 43, sy: 215 });
+		spaceInfo.set('d4', { minX: 19, minY: 245, maxX: 67, maxY: 293, sx: 43, sy: 269 });
+		spaceInfo.set('e1', { minX: 259, minY: 259, maxX: 307, maxY: 307, sx: 283, sy: 283 });
+		spaceInfo.set('e2', { minX: 214, minY: 214, maxX: 262, maxY: 262, sx: 238, sy: 238 });
+		spaceInfo.set('e3', { minX: 259, minY: 69, maxX: 307, maxY: 117, sx: 283, sy: 93 });
+		spaceInfo.set('e4', { minX: 214, minY: 114, maxX: 262, maxY: 162, sx: 238, sy: 138 });
+		spaceInfo.set('e5', { minX: 114, minY: 114, maxX: 162, maxY: 162, sx: 138, sy: 138 });
+		spaceInfo.set('e6', { minX: 69, minY: 69, maxX: 117, maxY: 117, sx: 93, sy: 93 });
+		spaceInfo.set('e7', { minX: 114, minY: 214, maxX: 162, maxY: 262, sx: 138, sy: 238 });
+		spaceInfo.set('e8', { minX: 69, minY: 259, maxX: 117, maxY: 307, sx: 93, sy: 283 });
+		spaceInfo.set('end', { minX: 19, minY: 309, maxX: 67, maxY: 357, sx: 43, sy: 333 });
+	};
+
+	const malMove = (posId, x, y) => {
+		const movable = movableSpace.get(posId);
+
+		const len = movable.length;
+		let arrival;
+		for (var i = 0; i < len; i++) {
+			let { minX, minY, maxX, maxY } = spaceInfo.get(movable[i]);
+			if (minX <= x && x <= maxX && minY <= y && y <= maxY) {
+				arrival = movable[i];
+				break;
+			}
+		}
+
+		if (arrival === undefined) {
+			arrival = posId;
+		}
+
+		const { sx, sy } = spaceInfo.get(arrival);
+		return { sx, sy, nextPos: arrival };
 	};
 
 	useEffect(() => {
-		console.log(teamNum, height)
 		setGame();
+
+		let dragExample = SVG('#drag_example');
+		dragExample.draggable();
+
+		dragExample.on('dragstart', (e) => {
+			const posId = e.target.dataset.pos;
+			const movable = movableSpace.get(posId);
+
+			movable.forEach((el) => {
+				let svgEl = SVG(`#${el}`);
+				svgEl.fill('#8AFF8A');
+			});
+		});
+
+		dragExample.on('dragend', (e) => {
+			e.preventDefault();
+			const posId = e.target.dataset.pos;
+
+			const movable = movableSpace.get(posId);
+			movable.forEach((el) => {
+				let svgEl = SVG(`#${el}`);
+				svgEl.fill('white');
+			});
+
+			const { handler, box } = e.detail;
+			const { sx, sy, nextPos } = malMove(posId, box.x, box.y);
+			handler.move(sx, sy);
+			e.target.dataset.pos = nextPos;
+		});
+
+		window.addEventListener('beforeunload', (e) => {
+			e.preventDefault();
+			e.returnValue = '';
+			confirm('나가시면 진행하던 게임이 초기화됩니다. 나가시겠습니까?');
+		});
+
+		return () => {
+			window.removeEventListener('beforeunload');
+		};
 	}, []);
 
 	return (
@@ -247,12 +307,21 @@ const GameBoard = () => {
 					</defs>
 
 					{/* 말 놓기 예시 */}
-					<use class='bird' x='188' y='188' width='24' height='24' href='#bird'></use>
-					<use class='hippo' x='43' y='43' width='24' height='24' href='#hippo'></use>
-					<use class='dragon' x='333' y='43' width='24' height='24' href='#dragon'></use>
-					<use class='cat' x='43' y='333' width='24' height='24' href='#cat'></use>
-					<use class='horse' x='333' y='333' width='24' height='24' href='#horse'></use>
-					<use class='fish' x='93' y='283' width='24' height='24' href='#fish'></use>
+					{/* 200 -> 188, 55 -> 43, 345 -> 333, 105 -> 93.  좌표값 = (x-12, y-12) */}
+					<use
+						id='drag_example'
+						data-pos='center'
+						className='bird'
+						x='188'
+						y='188'
+						width='24'
+						height='24'
+						href='#bird'></use>
+					<use className='hippo' x='43' y='43' width='24' height='24' href='#hippo'></use>
+					<use className='dragon' x='333' y='43' width='24' height='24' href='#dragon'></use>
+					<use className='cat' x='43' y='333' width='24' height='24' href='#cat'></use>
+					<use className='horse' x='333' y='333' width='24' height='24' href='#horse'></use>
+					<use className='fish' x='93' y='283' width='24' height='24' href='#fish'></use>
 				</svg>
 			</div>
 		</div>

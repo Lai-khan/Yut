@@ -8,6 +8,7 @@ import '../style/GameBoard.css';
 let teamRoster = new Map();
 let movableSpace = new Map();
 let spaceInfo = new Map();
+let startPos = new Map();
 
 const GameBoard = () => {
 	const [currentTurn, setCurrentTurn] = useState('team1');
@@ -78,10 +79,52 @@ const GameBoard = () => {
 		spaceInfo.set('e7', { minX: 114, minY: 214, maxX: 162, maxY: 262, sx: 138, sy: 238 });
 		spaceInfo.set('e8', { minX: 69, minY: 259, maxX: 117, maxY: 307, sx: 93, sy: 283 });
 		spaceInfo.set('end', { minX: 19, minY: 309, maxX: 67, maxY: 357, sx: 43, sy: 333 });
+
+		startPos.set('team1-1', { x: 418, y: 33 });
+		startPos.set('team1-2', { x: 458, y: 33 });
+		startPos.set('team1-3', { x: 498, y: 33 });
+		startPos.set('team1-4', { x: 538, y: 33 });
+		startPos.set('team2-1', { x: 418, y: 99.66 });
+		startPos.set('team2-2', { x: 458, y: 99.66 });
+		startPos.set('team2-3', { x: 498, y: 99.66 });
+		startPos.set('team2-4', { x: 538, y: 99.66 });
+		if (teamNum >= 3) {
+			startPos.set('team3-1', { x: 418, y: 166.32 });
+			startPos.set('team3-2', { x: 458, y: 166.32 });
+			startPos.set('team3-3', { x: 498, y: 166.32 });
+			startPos.set('team3-4', { x: 538, y: 166.32 });
+		}
+		if (teamNum >= 4) {
+			startPos.set('team4-1', { x: 418, y: 232.98 });
+			startPos.set('team4-2', { x: 458, y: 232.98 });
+			startPos.set('team4-3', { x: 498, y: 232.98 });
+			startPos.set('team4-4', { x: 538, y: 232.98 });
+		}
+		if (teamNum >= 5) {
+			startPos.set('team5-1', { x: 418, y: 299.64 });
+			startPos.set('team5-2', { x: 458, y: 299.64 });
+			startPos.set('team5-3', { x: 498, y: 299.64 });
+			startPos.set('team5-4', { x: 538, y: 299.64 });
+		}
 	};
 
-	const malMove = (dataset, x, y) => {
-		const posId = dataset.pos;
+	useEffect(() => {
+		setGame();
+
+		iterateTeamMal('team1', setDraggable);
+
+		window.addEventListener('beforeunload', (e) => {
+			e.preventDefault();
+			e.returnValue = '';
+			confirm('나가시면 진행하던 게임이 초기화됩니다. 나가시겠습니까?');
+		});
+
+		return () => {
+			window.removeEventListener('beforeunload');
+		};
+	}, []);
+
+	const malMove = (id, posId, x, y) => {
 		const movable = movableSpace.get(posId);
 
 		const len = movable.length;
@@ -99,7 +142,8 @@ const GameBoard = () => {
 		}
 
 		if (arrival === 'start') {
-			return { sx: dataset.beginX, sy: dataset.beginY, nextPos: arrival };
+			const { x: sx, y: sy } = startPos.get(id);
+			return { sx, sy, nextPos: arrival };
 		}
 
 		const { sx, sy } = spaceInfo.get(arrival);
@@ -132,9 +176,11 @@ const GameBoard = () => {
 			});
 
 			const { handler, box } = e.detail;
-			const { sx, sy, nextPos } = malMove(e.target.dataset, box.x, box.y);
+			const { sx, sy, nextPos } = malMove(id, posId, box.x, box.y);
 			handler.move(sx, sy);
 			e.target.dataset.pos = nextPos;
+
+			checkCatch(nextPos);
 		});
 	};
 
@@ -152,38 +198,52 @@ const GameBoard = () => {
 		}
 	};
 
-	useEffect(() => {
-		setGame();
-
-		iterateTeamMal('team1', setDraggable);
-
-		window.addEventListener('beforeunload', (e) => {
-			e.preventDefault();
-			e.returnValue = '';
-			confirm('나가시면 진행하던 게임이 초기화됩니다. 나가시겠습니까?');
-		});
-
-		return () => {
-			window.removeEventListener('beforeunload');
-		};
-	}, []);
-
 	const nextTurn = () => {
 		const next = teamRoster.get(currentTurn);
 
-		// 현재 팀 말 정지 draggable(false)
 		iterateTeamMal(currentTurn, stopDraggable);
-
-		// 다음 팀 말 draggable
-		iterateTeamMal(next, setDraggable);
-
-		// state 변경
 		setCurrentTurn(next);
 
-		// 현재 팀 표시
 		const checkmark = SVG('#check');
-		const posY = checkmark.node.attributes.y.value;
+		const posY = checkmark.node.getAttribute('y');
 		checkmark.move(435, Number(posY) + 66.66 > 300 ? 7 : Number(posY) + 66.66);
+	};
+
+	useEffect(() => {
+		iterateTeamMal(currentTurn, setDraggable);
+	}, [currentTurn]);
+
+	const checkCatch = (posId) => {
+		const pieces = document.getElementsByClassName('mal');
+		const len = pieces.length;
+		for (var i = 0; i < len; i++) {
+			const mal = document.getElementById(pieces[i].id);
+			if (mal.dataset.pos === posId && !mal.classList.contains(currentTurn)) {
+				reset(mal.id);
+			}
+		}
+	};
+
+	const reset = async (id) => {
+		const target = await SVG(`#${id}`);
+
+		const { x, y } = startPos.get(id);
+		target.node.setAttribute('data-pos', 'start');
+		target.move(x, y);
+		// data-pos 도 start로 되돌려야 한다.
+	};
+
+	const success = async (id) => {
+		const target = await SVG(`#${id}`);
+
+		const startId = `start${id.replace('team', '')}`;
+		const start = await SVG(`#${startId}`);
+
+		start.stroke({ color: '#2EFF2E', width: 3 });
+		target.removeClass(currentTurn);
+		target.draggable(false);
+
+		// 승리 조건 체크
 	};
 
 	return (
@@ -310,28 +370,28 @@ const GameBoard = () => {
 				<text x='405' y='20' className='middle'>
 					1팀
 				</text>
-				<circle cx='430' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='470' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='510' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='550' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start1-1' cx='430' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start1-2' cx='470' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start1-3' cx='510' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start1-4' cx='550' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 				<rect x='400' y='66.66' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
 				<text x='405' y='86.66' className='middle'>
 					2팀
 				</text>
-				<circle cx='430' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='470' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='510' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='550' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start2-1' cx='430' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start2-2' cx='470' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start2-3' cx='510' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start2-4' cx='550' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 				{teamNum >= 3 && (
 					<>
 						<rect x='400' y='133.32' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
 						<text x='405' y='153.32' className='middle'>
 							3팀
 						</text>
-						<circle cx='430' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='470' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='510' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='550' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start3-1' cx='430' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start3-2' cx='470' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start3-3' cx='510' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start3-4' cx='550' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 				{teamNum >= 4 && (
@@ -340,10 +400,10 @@ const GameBoard = () => {
 						<text x='405' y='219.98' className='middle'>
 							4팀
 						</text>
-						<circle cx='430' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='470' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='510' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='550' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start4-1' cx='430' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start4-2' cx='470' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start4-3' cx='510' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start4-4' cx='550' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 				{teamNum >= 5 && (
@@ -352,10 +412,10 @@ const GameBoard = () => {
 						<text x='405' y='286.64' className='middle'>
 							5팀
 						</text>
-						<circle cx='430' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='470' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='510' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='550' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start5-1' cx='430' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start5-2' cx='470' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start5-3' cx='510' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start5-4' cx='550' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 
@@ -410,8 +470,6 @@ const GameBoard = () => {
 				<use
 					id='team1-1'
 					data-pos='start'
-					data-beginX='418'
-					data-beginY='33'
 					className='mal bird team1'
 					x='418'
 					y='33'
@@ -421,8 +479,6 @@ const GameBoard = () => {
 				<use
 					id='team1-2'
 					data-pos='start'
-					data-beginX='458'
-					data-beginY='33'
 					className='mal bird team1'
 					x='458'
 					y='33'
@@ -432,8 +488,6 @@ const GameBoard = () => {
 				<use
 					id='team1-3'
 					data-pos='start'
-					data-beginX='498'
-					data-beginY='33'
 					className='mal bird team1'
 					x='498'
 					y='33'
@@ -443,8 +497,6 @@ const GameBoard = () => {
 				<use
 					id='team1-4'
 					data-pos='start'
-					data-beginX='538'
-					data-beginY='33'
 					className='mal bird team1'
 					x='538'
 					y='33'
@@ -454,8 +506,6 @@ const GameBoard = () => {
 				<use
 					id='team2-1'
 					data-pos='start'
-					data-beginX='418'
-					data-beginY='99.66'
 					className='mal hippo team2'
 					x='418'
 					y='99.66'
@@ -465,8 +515,6 @@ const GameBoard = () => {
 				<use
 					id='team2-2'
 					data-pos='start'
-					data-beginX='458'
-					data-beginY='99.66'
 					className='mal hippo team2'
 					x='458'
 					y='99.66'
@@ -476,8 +524,6 @@ const GameBoard = () => {
 				<use
 					id='team2-3'
 					data-pos='start'
-					data-beginX='498'
-					data-beginY='99.66'
 					className='mal hippo team2'
 					x='498'
 					y='99.66'
@@ -487,8 +533,6 @@ const GameBoard = () => {
 				<use
 					id='team2-4'
 					data-pos='start'
-					data-beginX='538'
-					data-beginY='99.66'
 					className='mal hippo team2'
 					x='538'
 					y='99.66'
@@ -500,8 +544,6 @@ const GameBoard = () => {
 						<use
 							id='team3-1'
 							data-pos='start'
-							data-beginX='418'
-							data-beginY='166.32'
 							className='mal dragon team3'
 							x='418'
 							y='166.32'
@@ -511,8 +553,6 @@ const GameBoard = () => {
 						<use
 							id='team3-2'
 							data-pos='start'
-							data-beginX='458'
-							data-beginY='166.32'
 							className='mal dragon team3'
 							x='458'
 							y='166.32'
@@ -522,8 +562,6 @@ const GameBoard = () => {
 						<use
 							id='team3-3'
 							data-pos='start'
-							data-beginX='498'
-							data-beginY='166.32'
 							className='mal dragon team3'
 							x='498'
 							y='166.32'
@@ -533,8 +571,6 @@ const GameBoard = () => {
 						<use
 							id='team3-4'
 							data-pos='start'
-							data-beginX='538'
-							data-beginY='166.32'
 							className='mal dragon team3'
 							x='538'
 							y='166.32'
@@ -548,8 +584,6 @@ const GameBoard = () => {
 						<use
 							id='team4-1'
 							data-pos='start'
-							data-beginX='418'
-							data-beginY='232.98'
 							className='mal cat team4'
 							x='418'
 							y='232.98'
@@ -559,8 +593,6 @@ const GameBoard = () => {
 						<use
 							id='team4-2'
 							data-pos='start'
-							data-beginX='458'
-							data-beginY='232.98'
 							className='mal cat team4'
 							x='458'
 							y='232.98'
@@ -570,8 +602,6 @@ const GameBoard = () => {
 						<use
 							id='team4-3'
 							data-pos='start'
-							data-beginX='498'
-							data-beginY='232.98'
 							className='mal cat team4'
 							x='498'
 							y='232.98'
@@ -581,8 +611,6 @@ const GameBoard = () => {
 						<use
 							id='team4-4'
 							data-pos='start'
-							data-beginX='538'
-							data-beginY='232.98'
 							className='mal cat team4'
 							x='538'
 							y='232.98'
@@ -596,8 +624,6 @@ const GameBoard = () => {
 						<use
 							id='team5-1'
 							data-pos='start'
-							data-beginX='418'
-							data-beginY='299.64'
 							className='mal horse team5'
 							x='418'
 							y='299.64'
@@ -607,8 +633,6 @@ const GameBoard = () => {
 						<use
 							id='team5-2'
 							data-pos='start'
-							data-beginX='458'
-							data-beginY='299.64'
 							className='mal horse team5'
 							x='458'
 							y='299.64'
@@ -618,8 +642,6 @@ const GameBoard = () => {
 						<use
 							id='team5-3'
 							data-pos='start'
-							data-beginX='498'
-							data-beginY='299.64'
 							className='mal horse team5'
 							x='498'
 							y='299.64'
@@ -629,8 +651,6 @@ const GameBoard = () => {
 						<use
 							id='team5-4'
 							data-pos='start'
-							data-beginX='538'
-							data-beginY='299.64'
 							className='mal horse team5'
 							x='538'
 							y='299.64'
@@ -645,7 +665,7 @@ const GameBoard = () => {
 				<Button id='nextTurn' variant='outlined' color='primary' size='large' onClick={nextTurn}>
 					다음턴
 				</Button>
-				<Button id='getThrough' variant='outlined' color='success' size='large' disabled>
+				<Button id='success' variant='outlined' color='success' size='large' disabled>
 					나기
 				</Button>
 				<Button id='rollback' variant='outlined' color='error' size='large'>

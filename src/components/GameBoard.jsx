@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { SVG } from '@svgdotjs/svg.js';
 import '@svgdotjs/svg.draggable.js';
 import { Box, Button } from '@mui/material';
+import Victory from './Victory';
 
 import '../style/GameBoard.css';
 
@@ -11,9 +12,13 @@ let spaceInfo = new Map();
 let startPos = new Map();
 
 const GameBoard = () => {
-	const [currentTurn, setCurrentTurn] = useState('team1');
 	const teamNum = localStorage.getItem('teamNum');
+	const [currentTurn, setCurrentTurn] = useState('team1');
+	const [canPass, setCanPass] = useState(false);
+	const [passableId, setPassableId] = useState();
+	const [gameEnd, setGameEnd] = useState(false);
 
+	// 게임 세팅
 	const setGame = () => {
 		for (var i = 1; i <= teamNum; i++) {
 			teamRoster.set(`team${i}`, `team${i == teamNum ? 1 : i + 1}`);
@@ -108,22 +113,31 @@ const GameBoard = () => {
 		}
 	};
 
+	const preventClose = (e) => {
+		e.preventDefault();
+		e.returnValue = '';
+		confirm('나가시면 진행하던 게임이 초기화됩니다. 나가시겠습니까?');
+	};
+
 	useEffect(() => {
 		setGame();
 
 		iterateTeamMal('team1', setDraggable);
 
-		window.addEventListener('beforeunload', (e) => {
-			e.preventDefault();
-			e.returnValue = '';
-			confirm('나가시면 진행하던 게임이 초기화됩니다. 나가시겠습니까?');
-		});
+		window.addEventListener('beforeunload', preventClose);
 
 		return () => {
-			window.removeEventListener('beforeunload');
+			window.removeEventListener('beforeunload', preventClose);
 		};
 	}, []);
 
+	useEffect(() => {
+		if (gameEnd) {
+			window.removeEventListener('beforeunload', preventClose);
+		}
+	}, [gameEnd]);
+
+	// 말 이동
 	const malMove = (id, posId, x, y) => {
 		const movable = movableSpace.get(posId);
 
@@ -181,6 +195,7 @@ const GameBoard = () => {
 			e.target.dataset.pos = nextPos;
 
 			checkCatch(nextPos);
+			checkPass();
 		});
 	};
 
@@ -198,6 +213,7 @@ const GameBoard = () => {
 		}
 	};
 
+	// 팀 로테이션
 	const nextTurn = () => {
 		const next = teamRoster.get(currentTurn);
 
@@ -206,13 +222,15 @@ const GameBoard = () => {
 
 		const checkmark = SVG('#check');
 		const posY = checkmark.node.getAttribute('y');
-		checkmark.move(435, Number(posY) + 66.66 > 300 ? 7 : Number(posY) + 66.66);
+		checkmark.move(435, Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66);
 	};
 
 	useEffect(() => {
 		iterateTeamMal(currentTurn, setDraggable);
+		checkPass();
 	}, [currentTurn]);
 
+	// 말 잡기
 	const checkCatch = (posId) => {
 		const pieces = document.getElementsByClassName('mal');
 		const len = pieces.length;
@@ -224,26 +242,57 @@ const GameBoard = () => {
 		}
 	};
 
+	// 말 잡힘
 	const reset = async (id) => {
 		const target = await SVG(`#${id}`);
 
 		const { x, y } = startPos.get(id);
 		target.node.setAttribute('data-pos', 'start');
 		target.move(x, y);
-		// data-pos 도 start로 되돌려야 한다.
 	};
 
-	const success = async (id) => {
-		const target = await SVG(`#${id}`);
+	// 말 나기
+	const checkPass = () => {
+		const pieces = document.getElementsByClassName(currentTurn);
+		const len = pieces.length;
+		for (var i = 0; i < len; i++) {
+			const mal = document.getElementById(pieces[i].id);
+			if (mal.getAttribute('data-pos') === 'end') {
+				setCanPass(true);
+				setPassableId(pieces[i].id);
+				return;
+			}
+		}
+		setCanPass(false);
+		setPassableId(undefined);
+	};
 
-		const startId = `start${id.replace('team', '')}`;
+	const pass = async () => {
+		if (passableId === undefined) {
+			return;
+		}
+
+		const target = await SVG(`#${passableId}`);
+		const startId = `start${passableId.replace('team', '')}`;
 		const start = await SVG(`#${startId}`);
+		const { x, y } = startPos.get(passableId);
 
 		start.stroke({ color: '#2EFF2E', width: 3 });
+		target.move(x, y);
 		target.removeClass(currentTurn);
 		target.draggable(false);
+		// 말이 업어져 있다면 업은 말 모두 나야하고, 업은 말은 따로 안보이게 처리해야 한다.
 
-		// 승리 조건 체크
+		checkVictory();
+
+		setCanPass(false);
+	};
+
+	const checkVictory = () => {
+		const pieces = document.getElementsByClassName(currentTurn);
+		if (pieces.length === 0) {
+			setGameEnd(true);
+		}
 	};
 
 	return (
@@ -662,16 +711,24 @@ const GameBoard = () => {
 			</svg>
 
 			<Box component='span' sx={{ '& button': { m: 2 } }}>
-				<Button id='nextTurn' variant='outlined' color='primary' size='large' onClick={nextTurn}>
+				<Button id='nextTurn' variant='contained' color='primary' size='large' onClick={nextTurn}>
 					다음턴
 				</Button>
-				<Button id='success' variant='outlined' color='success' size='large' disabled>
-					나기
-				</Button>
-				<Button id='rollback' variant='outlined' color='error' size='large'>
+				{canPass ? (
+					<Button variant='contained' color='success' size='large' onClick={pass}>
+						나기
+					</Button>
+				) : (
+					<Button variant='contained' color='success' size='large' disabled>
+						나기
+					</Button>
+				)}
+				<Button id='rollback' variant='contained' color='error' size='large'>
 					무르기
 				</Button>
 			</Box>
+
+			{!!gameEnd && <Victory teamName={`팀 ${currentTurn.replace('team', '')}`} />}
 		</div>
 	);
 };

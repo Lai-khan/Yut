@@ -23,7 +23,7 @@ const TeamNum = () => {
 						size='large'
 						onClick={() => {
 							if (teamNum > 2) {
-								setTeamNum((prevNum) => prevNum + 1);
+								setTeamNum((prevNum) => prevNum - 1);
 							}
 						}}>
 						<RemoveIcon />
@@ -34,7 +34,7 @@ const TeamNum = () => {
 						aria-label='add'
 						size='large'
 						onClick={() => {
-							if (teamNum < 6) {
+							if (teamNum < 5) {
 								setTeamNum((prevNum) => prevNum + 1);
 							}
 						}}>
@@ -42,7 +42,7 @@ const TeamNum = () => {
 					</IconButton>
 				</Box>
 			</div>
-			<p style={{ marginTop: '20px' }}>최소 2 ~ 최대 6</p>
+			<p style={{ marginTop: '20px' }}>최소 2 ~ 최대 5</p>
 			<Button id='nextBtn' variant='outlined' color='primary' size='large' href='/game'>
 				다음
 			</Button>

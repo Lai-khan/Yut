@@ -1,17 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SVG } from '@svgdotjs/svg.js';
 import '@svgdotjs/svg.draggable.js';
+import { Box, Button } from '@mui/material';
 
 import '../style/GameBoard.css';
 
+let teamRoster = new Map();
+let movableSpace = new Map();
+let spaceInfo = new Map();
+
 const GameBoard = () => {
-	// 각 칸별 갈 수 있는 칸
-	let movableSpace = new Map();
-	let spaceInfo = new Map();
+	const [currentTurn, setCurrentTurn] = useState('team1');
 	const teamNum = localStorage.getItem('teamNum');
-	const height = 150;
 
 	const setGame = () => {
+		for (var i = 1; i <= teamNum; i++) {
+			teamRoster.set(`team${i}`, `team${i == teamNum ? 1 : i + 1}`);
+		}
+
 		movableSpace.set('start', ['a1', 'a2', 'a3', 'a4', 'mo1']);
 		movableSpace.set('center', ['e2', 'e4', 'e7', 'e8', 'end']);
 		movableSpace.set('mo1', ['a4', 'e1', 'e2', 'center', 'e5', 'e6']);
@@ -102,7 +108,6 @@ const GameBoard = () => {
 
 	const setDraggable = async (id) => {
 		const element = await SVG(`#${id}`);
-		console.log(element);
 
 		element.draggable();
 
@@ -133,15 +138,24 @@ const GameBoard = () => {
 		});
 	};
 
+	const stopDraggable = async (id) => {
+		const element = await SVG(`#${id}`);
+
+		element.draggable(false);
+	};
+
+	const iterateTeamMal = (className, callback) => {
+		const pieces = document.getElementsByClassName(className);
+		const len = pieces.length;
+		for (var i = 0; i < len; i++) {
+			callback(pieces[i].id);
+		}
+	};
+
 	useEffect(() => {
 		setGame();
 
-		const pieces = document.getElementsByClassName('team1');
-		const len = pieces.length;
-		for (var i = 0; i < len; i++) {
-			console.log(pieces[i].id);
-			setDraggable(pieces[i].id);
-		}
+		iterateTeamMal('team1', setDraggable);
 
 		window.addEventListener('beforeunload', (e) => {
 			e.preventDefault();
@@ -153,6 +167,24 @@ const GameBoard = () => {
 			window.removeEventListener('beforeunload');
 		};
 	}, []);
+
+	const nextTurn = () => {
+		const next = teamRoster.get(currentTurn);
+
+		// 현재 팀 말 정지 draggable(false)
+		iterateTeamMal(currentTurn, stopDraggable);
+
+		// 다음 팀 말 draggable
+		iterateTeamMal(next, setDraggable);
+
+		// state 변경
+		setCurrentTurn(next);
+
+		// 현재 팀 표시
+		const checkmark = SVG('#check');
+		const posY = checkmark.node.attributes.y.value;
+		checkmark.move(435, Number(posY) + 66.66 > 300 ? 7 : Number(posY) + 66.66);
+	};
 
 	return (
 		<div id='game'>
@@ -326,18 +358,6 @@ const GameBoard = () => {
 						<circle cx='550' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
-				{teamNum >= 6 && (
-					<>
-						<rect x='400' y='333.3' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
-						<text x='405' y='353.3' className='middle'>
-							6팀
-						</text>
-						<circle cx='430' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='470' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='510' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='550' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-					</>
-				)}
 
 				{/* 말 */}
 				<defs>
@@ -377,14 +397,22 @@ const GameBoard = () => {
 					<symbol id='fish' viewBox='0 0 20 20'>
 						<rect height='20' width='20' fill='url(#fishPattern)' />
 					</symbol>
+					<pattern id='checkmarkPattern' x='0' y='0' width='15' height='15'>
+						<image href='./images/checked.png' x='0' y='0' height='15' width='15' />
+					</pattern>
+					<symbol id='checkmark' viewBox='0 0 15 15'>
+						<rect height='15' width='15' fill='url(#checkmarkPattern)' />
+					</symbol>
 				</defs>
+
+				<use id='check' x='435' y='7' width='15' height='15' href='#checkmark'></use>
 
 				<use
 					id='team1-1'
 					data-pos='start'
 					data-beginX='418'
 					data-beginY='33'
-					className='bird team1'
+					className='mal bird team1'
 					x='418'
 					y='33'
 					width='24'
@@ -395,7 +423,7 @@ const GameBoard = () => {
 					data-pos='start'
 					data-beginX='458'
 					data-beginY='33'
-					className='bird team1'
+					className='mal bird team1'
 					x='458'
 					y='33'
 					width='24'
@@ -406,7 +434,7 @@ const GameBoard = () => {
 					data-pos='start'
 					data-beginX='498'
 					data-beginY='33'
-					className='bird team1'
+					className='mal bird team1'
 					x='498'
 					y='33'
 					width='24'
@@ -417,7 +445,7 @@ const GameBoard = () => {
 					data-pos='start'
 					data-beginX='538'
 					data-beginY='33'
-					className='bird team1'
+					className='mal bird team1'
 					x='538'
 					y='33'
 					width='24'
@@ -428,7 +456,7 @@ const GameBoard = () => {
 					data-pos='start'
 					data-beginX='418'
 					data-beginY='99.66'
-					className='hippo team2'
+					className='mal hippo team2'
 					x='418'
 					y='99.66'
 					width='24'
@@ -439,7 +467,7 @@ const GameBoard = () => {
 					data-pos='start'
 					data-beginX='458'
 					data-beginY='99.66'
-					className='hippo team2'
+					className='mal hippo team2'
 					x='458'
 					y='99.66'
 					width='24'
@@ -450,7 +478,7 @@ const GameBoard = () => {
 					data-pos='start'
 					data-beginX='498'
 					data-beginY='99.66'
-					className='hippo team2'
+					className='mal hippo team2'
 					x='498'
 					y='99.66'
 					width='24'
@@ -461,7 +489,7 @@ const GameBoard = () => {
 					data-pos='start'
 					data-beginX='538'
 					data-beginY='99.66'
-					className='hippo team2'
+					className='mal hippo team2'
 					x='538'
 					y='99.66'
 					width='24'
@@ -474,7 +502,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='418'
 							data-beginY='166.32'
-							className='dragon team3'
+							className='mal dragon team3'
 							x='418'
 							y='166.32'
 							width='24'
@@ -485,7 +513,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='458'
 							data-beginY='166.32'
-							className='dragon team3'
+							className='mal dragon team3'
 							x='458'
 							y='166.32'
 							width='24'
@@ -496,7 +524,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='498'
 							data-beginY='166.32'
-							className='dragon team3'
+							className='mal dragon team3'
 							x='498'
 							y='166.32'
 							width='24'
@@ -507,7 +535,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='538'
 							data-beginY='166.32'
-							className='dragon team3'
+							className='mal dragon team3'
 							x='538'
 							y='166.32'
 							width='24'
@@ -522,7 +550,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='418'
 							data-beginY='232.98'
-							className='cat team4'
+							className='mal cat team4'
 							x='418'
 							y='232.98'
 							width='24'
@@ -533,7 +561,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='458'
 							data-beginY='232.98'
-							className='cat team4'
+							className='mal cat team4'
 							x='458'
 							y='232.98'
 							width='24'
@@ -544,7 +572,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='498'
 							data-beginY='232.98'
-							className='cat team4'
+							className='mal cat team4'
 							x='498'
 							y='232.98'
 							width='24'
@@ -555,7 +583,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='538'
 							data-beginY='232.98'
-							className='cat team4'
+							className='mal cat team4'
 							x='538'
 							y='232.98'
 							width='24'
@@ -570,7 +598,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='418'
 							data-beginY='299.64'
-							className='horse team5'
+							className='mal horse team5'
 							x='418'
 							y='299.64'
 							width='24'
@@ -581,7 +609,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='458'
 							data-beginY='299.64'
-							className='horse team5'
+							className='mal horse team5'
 							x='458'
 							y='299.64'
 							width='24'
@@ -592,7 +620,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='498'
 							data-beginY='299.64'
-							className='horse team5'
+							className='mal horse team5'
 							x='498'
 							y='299.64'
 							width='24'
@@ -603,7 +631,7 @@ const GameBoard = () => {
 							data-pos='start'
 							data-beginX='538'
 							data-beginY='299.64'
-							className='horse team5'
+							className='mal horse team5'
 							x='538'
 							y='299.64'
 							width='24'
@@ -611,55 +639,19 @@ const GameBoard = () => {
 							href='#horse'></use>
 					</>
 				)}
-				{teamNum >= 6 && (
-					<>
-						<use
-							id='team6-1'
-							data-pos='start'
-							data-beginX='418'
-							data-beginY='366.3'
-							className='fish team6'
-							x='418'
-							y='366.3'
-							width='24'
-							height='24'
-							href='#fish'></use>
-						<use
-							id='team6-2'
-							data-pos='start'
-							data-beginX='458'
-							data-beginY='366.3'
-							className='fish team6'
-							x='458'
-							y='366.3'
-							width='24'
-							height='24'
-							href='#fish'></use>
-						<use
-							id='team6-3'
-							data-pos='start'
-							data-beginX='498'
-							data-beginY='366.3'
-							className='fish team6'
-							x='498'
-							y='366.3'
-							width='24'
-							height='24'
-							href='#fish'></use>
-						<use
-							id='team6-4'
-							data-pos='start'
-							data-beginX='538'
-							data-beginY='366.3'
-							className='fish team6'
-							x='538'
-							y='366.3'
-							width='24'
-							height='24'
-							href='#fish'></use>
-					</>
-				)}
 			</svg>
+
+			<Box component='span' sx={{ '& button': { m: 2 } }}>
+				<Button id='nextTurn' variant='outlined' color='primary' size='large' onClick={nextTurn}>
+					다음턴
+				</Button>
+				<Button id='getThrough' variant='outlined' color='success' size='large' disabled>
+					나기
+				</Button>
+				<Button id='rollback' variant='outlined' color='error' size='large'>
+					무르기
+				</Button>
+			</Box>
 		</div>
 	);
 };

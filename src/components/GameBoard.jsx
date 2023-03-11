@@ -122,8 +122,6 @@ const GameBoard = () => {
 	useEffect(() => {
 		setGame();
 
-		iterateTeamMal('team1', setDraggable);
-
 		window.addEventListener('beforeunload', preventClose);
 
 		return () => {
@@ -202,7 +200,7 @@ const GameBoard = () => {
 	const stopDraggable = async (id) => {
 		const element = await SVG(`#${id}`);
 
-		element.draggable(false);
+		console.log(element);
 	};
 
 	const iterateTeamMal = (className, callback) => {
@@ -470,51 +468,27 @@ const GameBoard = () => {
 
 				{/* 말 */}
 				<defs>
-					<pattern id='birdPattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
-					</pattern>
 					<symbol id='bird' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#birdPattern)' />
+						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
 					</symbol>
-					<pattern id='hippoPattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
-					</pattern>
 					<symbol id='hippo' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#hippoPattern)' />
+						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
 					</symbol>
-					<pattern id='dragonPattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
-					</pattern>
 					<symbol id='dragon' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#dragonPattern)' />
+						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
 					</symbol>
-					<pattern id='catPattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
-					</pattern>
 					<symbol id='cat' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#catPattern)' />
+						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
 					</symbol>
-					<pattern id='horsePattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
-					</pattern>
 					<symbol id='horse' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#horsePattern)' />
+						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
 					</symbol>
-					<pattern id='fishPattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
-					</pattern>
 					<symbol id='fish' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#fishPattern)' />
-					</symbol>
-					<pattern id='checkmarkPattern' x='0' y='0' width='15' height='15'>
-						<image href='./images/checked.png' x='0' y='0' height='15' width='15' />
-					</pattern>
-					<symbol id='checkmark' viewBox='0 0 15 15'>
-						<rect height='15' width='15' fill='url(#checkmarkPattern)' />
+						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
 					</symbol>
 				</defs>
 
-				<use id='check' x='435' y='7' width='15' height='15' href='#checkmark'></use>
+				<image id='check' x='435' y='7' width='15' height='15' href='./images/checked.png' />
 
 				<use
 					id='team1-1'

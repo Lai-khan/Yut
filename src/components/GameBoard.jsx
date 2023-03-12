@@ -275,12 +275,19 @@ const GameBoard = () => {
 	// 말 잡힘
 	const reset = async (id) => {
 		const target = await SVG(`#${id}`);
+		const num = target.node.getAttribute('data-num');
+
+		if (Number(num) !== 1) {
+			const ids = target.node.getAttribute('data-include').split(' ');
+			ids.forEach((id) => {
+				const { x, y } = startPos.get(id);
+				SVG(`#${id}`).move(x, y);
+			});
+		}
 
 		const { x, y } = startPos.get(id);
 		target.node.setAttribute('data-pos', 'start');
 		target.move(x, y);
-
-		// TODO 업은말 고려
 	};
 
 	// 말 업기
@@ -308,10 +315,6 @@ const GameBoard = () => {
 		const el1 = document.getElementById(id1);
 		const el2 = document.getElementById(id2);
 		const num = Number(el1.getAttribute('data-num')) + Number(el2.getAttribute('data-num'));
-
-		console.log('el1', el1);
-		console.log('el2', el2);
-		console.log('num', num);
 
 		let plural;
 		let includeStr;
@@ -342,12 +345,10 @@ const GameBoard = () => {
 			return;
 		}
 
-		console.log('plural', plural);
 		const { sx, sy } = spaceInfo.get(posId);
 		plural.move(sx, sy);
 		plural.node.setAttribute('data-pos', posId);
 		plural.node.setAttribute('data-include', includeStr);
-		console.log(includeStr);
 
 		// 후처리 - 숨김처리
 		const svg1 = await SVG(`#${id1}`);
@@ -390,25 +391,46 @@ const GameBoard = () => {
 		}
 
 		const target = await SVG(`#${passableId}`);
-		const startId = `start${passableId.replace('team', '')}`;
-		const start = await SVG(`#${startId}`);
-		const { x, y } = startPos.get(passableId);
+		const num = target.node.getAttribute('data-num');
+		let ids = [];
 
-		start.stroke({ color: '#2EFF2E', width: 3 });
-		target.move(x, y);
-		target.removeClass(currentTurn);
-		target.draggable(false);
+		if (Number(num) !== 1) {
+			ids = target.node.getAttribute('data-include').split(' ');
+			target.move(-20, -20);
+			target.removeClass(currentTurn);
+			target.draggable(false);
+		} else {
+			ids.push(passableId);
+		}
 
-		// TODO 업은 말 고려
+		ids.forEach(async (id) => {
+			const svg = await SVG(`#${id}`);
+			const startId = `start${id.replace('team', '')}`;
+			const start = await SVG(`#${startId}`);
+			const { x, y } = startPos.get(id);
 
-		checkVictory();
+			start.stroke({ color: '#2EFF2E', width: 3 });
+			svg.move(x, y);
+			svg.removeClass(currentTurn);
+			svg.draggable(false);
+		});
 
 		setCanPass(false);
+
+		setTimeout(() => checkVictory(), 1000);
 	};
 
 	const checkVictory = () => {
-		const pieces = document.getElementsByClassName(currentTurn);
-		if (pieces.length === 0) {
+		const pieces = Array.from(document.getElementsByClassName(currentTurn));
+		let isEnd = true;
+
+		pieces.forEach((piece) => {
+			if (piece.getAttribute('data-num') == 1) {
+				isEnd = false;
+			}
+		});
+
+		if (isEnd) {
 			setGameEnd(true);
 		}
 	};
@@ -1008,7 +1030,7 @@ const GameBoard = () => {
 							width='24'
 							height='24'
 							data-pos='start'
-							data-num='4'
+							data-num='3'
 							href='#cat3'></use>
 						<use
 							id='team4-8'

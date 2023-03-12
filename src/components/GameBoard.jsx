@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { SVG } from '@svgdotjs/svg.js';
 import '@svgdotjs/svg.draggable.js';
 import { Box, Button } from '@mui/material';
@@ -14,7 +14,6 @@ let startPos = new Map();
 
 const GameBoard = () => {
 	const teamNum = localStorage.getItem('teamNum');
-	const [currentTurn, setCurrentTurn] = useState('team1');
 	const [canPass, setCanPass] = useState(false);
 	const [passableId, setPassableId] = useState();
 	const [gameEnd, setGameEnd] = useState(false);
@@ -162,6 +161,8 @@ const GameBoard = () => {
 	useEffect(() => {
 		setGame();
 
+		iterateTeamMal(currentTurn, setDraggable);
+
 		window.addEventListener('beforeunload', preventClose);
 
 		return () => {
@@ -230,13 +231,16 @@ const GameBoard = () => {
 			const { handler, box } = e.detail;
 			const { sx, sy, nextPos } = malMove(id, posId, box.x, box.y);
 			handler.move(sx, sy);
-			e.target.dataset.pos = nextPos;
 
-			checkCatch(nextPos);
-			checkJoin(id, nextPos);
-			checkPass();
+			if (posId !== nextPos) {
+				e.target.dataset.pos = nextPos;
 
-			setTimeout(() => saveHistory(), 100);
+				checkCatch(nextPos);
+				checkJoin(id, nextPos);
+				checkPass();
+
+				setTimeout(() => saveHistory(), 100);
+			}
 		});
 	};
 
@@ -259,19 +263,12 @@ const GameBoard = () => {
 		const next = teamRoster.get(currentTurn);
 
 		iterateTeamMal(currentTurn, stopDraggable);
-		setCurrentTurn(next);
+		dispatch({ type: 'NEXT', nextTurn: next });
 
 		const checkmark = SVG('#check');
 		const posY = checkmark.node.getAttribute('y');
-		await checkmark.move(435, Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66);
-
-		saveHistory();
+		checkmark.move(435, Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66);
 	};
-
-	useEffect(() => {
-		iterateTeamMal(currentTurn, setDraggable);
-		checkPass();
-	}, [currentTurn]);
 
 	// 말 잡기
 	const checkCatch = (posId) => {
@@ -364,7 +361,6 @@ const GameBoard = () => {
 		plural.node.setAttribute('data-pos', posId);
 		plural.node.setAttribute('data-include', includeStr);
 
-		// 후처리 - 숨김처리
 		const svg1 = await SVG(`#${id1}`);
 		const svg2 = await SVG(`#${id2}`);
 		svg1.node.setAttribute('data-pos', 'start');
@@ -460,10 +456,14 @@ const GameBoard = () => {
 	 * 	checkmark: {}
 	 * }
 	 */
-	const saveHistory = () => {
+	const saveHistory = (nextTurn = null) => {
 		let history = new Object();
 
-		history.currentTurn = currentTurn;
+		if (nextTurn !== null) {
+			history.currentTurn = nextTurn;
+		} else {
+			history.currentTurn = currentTurn;
+		}
 
 		const checkmark = SVG('#check');
 		history.checkmark = { x: 435, y: checkmark.node.getAttribute('y') };
@@ -510,7 +510,7 @@ const GameBoard = () => {
 
 		if (currentTurn !== recent.currentTurn) {
 			iterateTeamMal(currentTurn, stopDraggable);
-			setCurrentTurn(recent.currentTurn);
+			dispatch({ type: 'ROLLBACK', nextTurn: recent.currentTurn });
 		}
 
 		const checkmark = SVG('#check');
@@ -547,6 +547,18 @@ const GameBoard = () => {
 
 		setHistory();
 	};
+
+	const [currentTurn, dispatch] = useReducer((state, action) => {
+		iterateTeamMal(action.nextTurn, setDraggable);
+		checkPass();
+		switch (action.type) {
+			case 'NEXT':
+				saveHistory(action.nextTurn);
+				return action.nextTurn;
+			case 'ROLLBACK':
+				return action.nextTurn;
+		}
+	}, 'team1');
 
 	return (
 		<div id='game'>

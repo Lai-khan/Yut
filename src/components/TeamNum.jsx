@@ -23,7 +23,7 @@ const TeamNum = () => {
 						size='large'
 						onClick={() => {
 							if (teamNum > 2) {
-								setTeamNum((prevNum) => prevNum + 1);
+								setTeamNum((prevNum) => prevNum - 1);
 							}
 						}}>
 						<RemoveIcon />

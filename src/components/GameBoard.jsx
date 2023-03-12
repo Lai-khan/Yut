@@ -1,17 +1,29 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SVG } from '@svgdotjs/svg.js';
 import '@svgdotjs/svg.draggable.js';
+import { Box, Button } from '@mui/material';
+import Victory from './Victory';
 
 import '../style/GameBoard.css';
 
-const GameBoard = () => {
-	// 각 칸별 갈 수 있는 칸
-	let movableSpace = new Map();
-	let spaceInfo = new Map();
-	const teamNum = localStorage.getItem('teamNum');
-	const height = 150;
+let teamRoster = new Map();
+let movableSpace = new Map();
+let spaceInfo = new Map();
+let startPos = new Map();
 
+const GameBoard = () => {
+	const teamNum = localStorage.getItem('teamNum');
+	const [currentTurn, setCurrentTurn] = useState('team1');
+	const [canPass, setCanPass] = useState(false);
+	const [passableId, setPassableId] = useState();
+	const [gameEnd, setGameEnd] = useState(false);
+
+	// 게임 세팅
 	const setGame = () => {
+		for (var i = 1; i <= teamNum; i++) {
+			teamRoster.set(`team${i}`, `team${i == teamNum ? 1 : i + 1}`);
+		}
+
 		movableSpace.set('start', ['a1', 'a2', 'a3', 'a4', 'mo1']);
 		movableSpace.set('center', ['e2', 'e4', 'e7', 'e8', 'end']);
 		movableSpace.set('mo1', ['a4', 'e1', 'e2', 'center', 'e5', 'e6']);
@@ -72,10 +84,89 @@ const GameBoard = () => {
 		spaceInfo.set('e7', { minX: 114, minY: 214, maxX: 162, maxY: 262, sx: 138, sy: 238 });
 		spaceInfo.set('e8', { minX: 69, minY: 259, maxX: 117, maxY: 307, sx: 93, sy: 283 });
 		spaceInfo.set('end', { minX: 19, minY: 309, maxX: 67, maxY: 357, sx: 43, sy: 333 });
+
+		startPos.set('team1-1', { x: 418, y: 33 });
+		startPos.set('team1-2', { x: 458, y: 33 });
+		startPos.set('team1-3', { x: 498, y: 33 });
+		startPos.set('team1-4', { x: 538, y: 33 });
+		startPos.set('team1-5', { x: -20, y: -20 });
+		startPos.set('team1-6', { x: -20, y: -20 });
+		startPos.set('team1-7', { x: -20, y: -20 });
+		startPos.set('team1-8', { x: -20, y: -20 });
+		startPos.set('team2-1', { x: 418, y: 99.66 });
+		startPos.set('team2-2', { x: 458, y: 99.66 });
+		startPos.set('team2-3', { x: 498, y: 99.66 });
+		startPos.set('team2-4', { x: 538, y: 99.66 });
+		startPos.set('team2-5', { x: -20, y: -20 });
+		startPos.set('team2-6', { x: -20, y: -20 });
+		startPos.set('team2-7', { x: -20, y: -20 });
+		startPos.set('team2-8', { x: -20, y: -20 });
+		if (teamNum >= 3) {
+			startPos.set('team3-1', { x: 418, y: 166.32 });
+			startPos.set('team3-2', { x: 458, y: 166.32 });
+			startPos.set('team3-3', { x: 498, y: 166.32 });
+			startPos.set('team3-4', { x: 538, y: 166.32 });
+			startPos.set('team3-5', { x: -20, y: -20 });
+			startPos.set('team3-6', { x: -20, y: -20 });
+			startPos.set('team3-7', { x: -20, y: -20 });
+			startPos.set('team3-8', { x: -20, y: -20 });
+		}
+		if (teamNum >= 4) {
+			startPos.set('team4-1', { x: 418, y: 232.98 });
+			startPos.set('team4-2', { x: 458, y: 232.98 });
+			startPos.set('team4-3', { x: 498, y: 232.98 });
+			startPos.set('team4-4', { x: 538, y: 232.98 });
+			startPos.set('team4-5', { x: -20, y: -20 });
+			startPos.set('team4-6', { x: -20, y: -20 });
+			startPos.set('team4-7', { x: -20, y: -20 });
+			startPos.set('team4-8', { x: -20, y: -20 });
+		}
+		if (teamNum >= 5) {
+			startPos.set('team5-1', { x: 418, y: 299.64 });
+			startPos.set('team5-2', { x: 458, y: 299.64 });
+			startPos.set('team5-3', { x: 498, y: 299.64 });
+			startPos.set('team5-4', { x: 538, y: 299.64 });
+			startPos.set('team5-5', { x: -20, y: -20 });
+			startPos.set('team5-6', { x: -20, y: -20 });
+			startPos.set('team5-7', { x: -20, y: -20 });
+			startPos.set('team5-8', { x: -20, y: -20 });
+		}
+		if (teamNum >= 6) {
+			startPos.set('team6-1', { x: 418, y: 366.3 });
+			startPos.set('team6-2', { x: 458, y: 366.3 });
+			startPos.set('team6-3', { x: 498, y: 366.3 });
+			startPos.set('team6-4', { x: 538, y: 366.3 });
+			startPos.set('team6-5', { x: -20, y: -20 });
+			startPos.set('team6-6', { x: -20, y: -20 });
+			startPos.set('team6-7', { x: -20, y: -20 });
+			startPos.set('team6-8', { x: -20, y: -20 });
+		}
 	};
 
-	const malMove = (dataset, x, y) => {
-		const posId = dataset.pos;
+	const preventClose = (e) => {
+		e.preventDefault();
+		e.returnValue = '';
+		confirm('나가시면 진행하던 게임이 초기화됩니다. 나가시겠습니까?');
+	};
+
+	useEffect(() => {
+		setGame();
+
+		window.addEventListener('beforeunload', preventClose);
+
+		return () => {
+			window.removeEventListener('beforeunload', preventClose);
+		};
+	}, []);
+
+	useEffect(() => {
+		if (gameEnd) {
+			window.removeEventListener('beforeunload', preventClose);
+		}
+	}, [gameEnd]);
+
+	// 말 이동
+	const malMove = (id, posId, x, y) => {
 		const movable = movableSpace.get(posId);
 
 		const len = movable.length;
@@ -93,7 +184,8 @@ const GameBoard = () => {
 		}
 
 		if (arrival === 'start') {
-			return { sx: dataset.beginX, sy: dataset.beginY, nextPos: arrival };
+			const { x: sx, y: sy } = startPos.get(id);
+			return { sx, sy, nextPos: arrival };
 		}
 
 		const { sx, sy } = spaceInfo.get(arrival);
@@ -102,7 +194,6 @@ const GameBoard = () => {
 
 	const setDraggable = async (id) => {
 		const element = await SVG(`#${id}`);
-		console.log(element);
 
 		element.draggable();
 
@@ -127,32 +218,222 @@ const GameBoard = () => {
 			});
 
 			const { handler, box } = e.detail;
-			const { sx, sy, nextPos } = malMove(e.target.dataset, box.x, box.y);
+			const { sx, sy, nextPos } = malMove(id, posId, box.x, box.y);
 			handler.move(sx, sy);
 			e.target.dataset.pos = nextPos;
+
+			checkCatch(nextPos);
+			checkJoin(id, nextPos);
+			checkPass();
 		});
 	};
 
-	useEffect(() => {
-		setGame();
+	const stopDraggable = async (id) => {
+		const element = await SVG(`#${id}`);
 
-		const pieces = document.getElementsByClassName('team1');
+		element.draggable(false);
+	};
+
+	const iterateTeamMal = (className, callback) => {
+		const pieces = document.getElementsByClassName(className);
 		const len = pieces.length;
 		for (var i = 0; i < len; i++) {
-			console.log(pieces[i].id);
-			setDraggable(pieces[i].id);
+			callback(pieces[i].id);
+		}
+	};
+
+	// 팀 로테이션
+	const nextTurn = () => {
+		const next = teamRoster.get(currentTurn);
+
+		iterateTeamMal(currentTurn, stopDraggable);
+		setCurrentTurn(next);
+
+		const checkmark = SVG('#check');
+		const posY = checkmark.node.getAttribute('y');
+		checkmark.move(435, Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66);
+	};
+
+	useEffect(() => {
+		iterateTeamMal(currentTurn, setDraggable);
+		checkPass();
+	}, [currentTurn]);
+
+	// 말 잡기
+	const checkCatch = (posId) => {
+		const pieces = document.getElementsByClassName('mal');
+		const len = pieces.length;
+		for (var i = 0; i < len; i++) {
+			const mal = document.getElementById(pieces[i].id);
+			if (mal.dataset.pos === posId && !mal.classList.contains(currentTurn)) {
+				reset(mal.id);
+				return;
+			}
+		}
+	};
+
+	// 말 잡힘
+	const reset = async (id) => {
+		const target = await SVG(`#${id}`);
+		const num = target.node.getAttribute('data-num');
+
+		if (Number(num) !== 1) {
+			const ids = target.node.getAttribute('data-include').split(' ');
+			ids.forEach((id) => {
+				const { x, y } = startPos.get(id);
+				SVG(`#${id}`).move(x, y);
+			});
 		}
 
-		window.addEventListener('beforeunload', (e) => {
-			e.preventDefault();
-			e.returnValue = '';
-			confirm('나가시면 진행하던 게임이 초기화됩니다. 나가시겠습니까?');
+		const { x, y } = startPos.get(id);
+		target.node.setAttribute('data-pos', 'start');
+		target.move(x, y);
+	};
+
+	// 말 업기
+	const checkJoin = (id, posId) => {
+		if (posId === 'start') {
+			return;
+		}
+
+		const pieces = document.getElementsByClassName(currentTurn);
+		const len = pieces.length;
+		for (var i = 0; i < len; i++) {
+			if (pieces[i].id === id) {
+				continue;
+			}
+
+			const mal = document.getElementById(pieces[i].id);
+			if (mal.dataset.pos === posId && mal.classList.contains(currentTurn)) {
+				join(id, pieces[i].id, posId);
+				return;
+			}
+		}
+	};
+
+	const join = async (id1, id2, posId) => {
+		const el1 = document.getElementById(id1);
+		const el2 = document.getElementById(id2);
+		const num = Number(el1.getAttribute('data-num')) + Number(el2.getAttribute('data-num'));
+
+		let plural;
+		let includeStr;
+		const include1 = el1.getAttribute('data-include');
+		const include2 = el2.getAttribute('data-include');
+		if (num == 2) {
+			plural = await getDoublePiece();
+			includeStr = `${id1} ${id2}`;
+		} else if (num == 3) {
+			plural = await SVG(`#${currentTurn}-7`);
+
+			if (include1 === null) {
+				includeStr = `${id1} ${include2}`;
+			} else {
+				includeStr = `${id2} ${include1}`;
+			}
+		} else if (num == 4) {
+			plural = await SVG(`#${currentTurn}-8`);
+
+			if (include1 === null) {
+				includeStr = `${id1} ${include2}`;
+			} else if (include2 === null) {
+				includeStr = `${id2} ${include1}`;
+			} else {
+				includeStr = `${include1} ${include2}`;
+			}
+		} else {
+			return;
+		}
+
+		const { sx, sy } = spaceInfo.get(posId);
+		plural.move(sx, sy);
+		plural.node.setAttribute('data-pos', posId);
+		plural.node.setAttribute('data-include', includeStr);
+
+		// 후처리 - 숨김처리
+		const svg1 = await SVG(`#${id1}`);
+		const svg2 = await SVG(`#${id2}`);
+		svg1.node.setAttribute('data-pos', 'start');
+		svg2.node.setAttribute('data-pos', 'start');
+		svg1.move(-20, -20);
+		svg2.move(-20, -20);
+	};
+
+	const getDoublePiece = () => {
+		const id = `${currentTurn}-5`;
+
+		if (document.getElementById(id).getAttribute('data-pos') === 'start') {
+			return SVG(`#${id}`);
+		}
+
+		return SVG(`#${currentTurn}-6`);
+	};
+
+	// 말 나기
+	const checkPass = () => {
+		const pieces = document.getElementsByClassName(currentTurn);
+		const len = pieces.length;
+		for (var i = 0; i < len; i++) {
+			const mal = document.getElementById(pieces[i].id);
+			if (mal.getAttribute('data-pos') === 'end') {
+				setCanPass(true);
+				setPassableId(pieces[i].id);
+				return;
+			}
+		}
+		setCanPass(false);
+		setPassableId(undefined);
+	};
+
+	const pass = async () => {
+		if (passableId === undefined) {
+			return;
+		}
+
+		const target = await SVG(`#${passableId}`);
+		const num = target.node.getAttribute('data-num');
+		let ids = [];
+
+		if (Number(num) !== 1) {
+			ids = target.node.getAttribute('data-include').split(' ');
+			target.move(-20, -20);
+			target.removeClass(currentTurn);
+			target.draggable(false);
+		} else {
+			ids.push(passableId);
+		}
+
+		ids.forEach(async (id) => {
+			const svg = await SVG(`#${id}`);
+			const startId = `start${id.replace('team', '')}`;
+			const start = await SVG(`#${startId}`);
+			const { x, y } = startPos.get(id);
+
+			start.stroke({ color: '#2EFF2E', width: 3 });
+			svg.move(x, y);
+			svg.removeClass(currentTurn);
+			svg.draggable(false);
 		});
 
-		return () => {
-			window.removeEventListener('beforeunload');
-		};
-	}, []);
+		setCanPass(false);
+
+		setTimeout(() => checkVictory(), 1000);
+	};
+
+	const checkVictory = () => {
+		const pieces = Array.from(document.getElementsByClassName(currentTurn));
+		let isEnd = true;
+
+		pieces.forEach((piece) => {
+			if (piece.getAttribute('data-num') == 1) {
+				isEnd = false;
+			}
+		});
+
+		if (isEnd) {
+			setGameEnd(true);
+		}
+	};
 
 	return (
 		<div id='game'>
@@ -278,28 +559,28 @@ const GameBoard = () => {
 				<text x='405' y='20' className='middle'>
 					1팀
 				</text>
-				<circle cx='430' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='470' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='510' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='550' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start1-1' cx='430' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start1-2' cx='470' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start1-3' cx='510' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start1-4' cx='550' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 				<rect x='400' y='66.66' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
 				<text x='405' y='86.66' className='middle'>
 					2팀
 				</text>
-				<circle cx='430' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='470' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='510' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle cx='550' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start2-1' cx='430' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start2-2' cx='470' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start2-3' cx='510' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle id='start2-4' cx='550' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 				{teamNum >= 3 && (
 					<>
 						<rect x='400' y='133.32' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
 						<text x='405' y='153.32' className='middle'>
 							3팀
 						</text>
-						<circle cx='430' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='470' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='510' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='550' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start3-1' cx='430' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start3-2' cx='470' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start3-3' cx='510' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start3-4' cx='550' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 				{teamNum >= 4 && (
@@ -308,10 +589,10 @@ const GameBoard = () => {
 						<text x='405' y='219.98' className='middle'>
 							4팀
 						</text>
-						<circle cx='430' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='470' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='510' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='550' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start4-1' cx='430' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start4-2' cx='470' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start4-3' cx='510' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start4-4' cx='550' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 				{teamNum >= 5 && (
@@ -320,10 +601,10 @@ const GameBoard = () => {
 						<text x='405' y='286.64' className='middle'>
 							5팀
 						</text>
-						<circle cx='430' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='470' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='510' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='550' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start5-1' cx='430' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start5-2' cx='470' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start5-3' cx='510' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start5-4' cx='550' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 				{teamNum >= 6 && (
@@ -332,334 +613,626 @@ const GameBoard = () => {
 						<text x='405' y='353.3' className='middle'>
 							6팀
 						</text>
-						<circle cx='430' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='470' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='510' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle cx='550' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start6-1' cx='430' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start6-2' cx='470' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start6-3' cx='510' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start6-4' cx='550' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
 
 				{/* 말 */}
 				<defs>
-					<pattern id='birdPattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
-					</pattern>
 					<symbol id='bird' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#birdPattern)' />
+						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
 					</symbol>
-					<pattern id='hippoPattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
-					</pattern>
+					<symbol id='bird2' viewBox='0 0 20 20'>
+						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='bird3' viewBox='0 0 20 20'>
+						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='bird4' viewBox='0 0 20 20'>
+						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
+					</symbol>
 					<symbol id='hippo' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#hippoPattern)' />
+						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
 					</symbol>
-					<pattern id='dragonPattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
-					</pattern>
+					<symbol id='hippo2' viewBox='0 0 20 20'>
+						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='hippo3' viewBox='0 0 20 20'>
+						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='hippo4' viewBox='0 0 20 20'>
+						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
+					</symbol>
 					<symbol id='dragon' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#dragonPattern)' />
+						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
 					</symbol>
-					<pattern id='catPattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
-					</pattern>
+					<symbol id='dragon2' viewBox='0 0 20 20'>
+						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='dragon3' viewBox='0 0 20 20'>
+						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='dragon4' viewBox='0 0 20 20'>
+						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
+					</symbol>
 					<symbol id='cat' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#catPattern)' />
+						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
 					</symbol>
-					<pattern id='horsePattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
-					</pattern>
+					<symbol id='cat2' viewBox='0 0 20 20'>
+						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='cat3' viewBox='0 0 20 20'>
+						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='cat4' viewBox='0 0 20 20'>
+						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
+					</symbol>
 					<symbol id='horse' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#horsePattern)' />
+						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
 					</symbol>
-					<pattern id='fishPattern' x='0' y='0' width='24' height='24'>
-						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
-					</pattern>
+					<symbol id='horse2' viewBox='0 0 20 20'>
+						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='horse3' viewBox='0 0 20 20'>
+						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='horse4' viewBox='0 0 20 20'>
+						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
+					</symbol>
 					<symbol id='fish' viewBox='0 0 20 20'>
-						<rect height='20' width='20' fill='url(#fishPattern)' />
+						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
+					</symbol>
+					<symbol id='fish2' viewBox='0 0 20 20'>
+						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='fish3' viewBox='0 0 20 20'>
+						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='fish4' viewBox='0 0 20 20'>
+						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
 					</symbol>
 				</defs>
 
+				<image id='check' x='435' y='7' width='15' height='15' href='./images/checked.png' />
+
 				<use
 					id='team1-1'
-					data-pos='start'
-					data-beginX='418'
-					data-beginY='33'
-					className='bird team1'
+					className='mal bird team1'
 					x='418'
 					y='33'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#bird'></use>
 				<use
 					id='team1-2'
-					data-pos='start'
-					data-beginX='458'
-					data-beginY='33'
-					className='bird team1'
+					className='mal bird team1'
 					x='458'
 					y='33'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#bird'></use>
 				<use
 					id='team1-3'
-					data-pos='start'
-					data-beginX='498'
-					data-beginY='33'
-					className='bird team1'
+					className='mal bird team1'
 					x='498'
 					y='33'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#bird'></use>
 				<use
 					id='team1-4'
-					data-pos='start'
-					data-beginX='538'
-					data-beginY='33'
-					className='bird team1'
+					className='mal bird team1'
 					x='538'
 					y='33'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#bird'></use>
 				<use
-					id='team2-1'
+					id='team1-5'
+					className='mal bird team1'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
 					data-pos='start'
-					data-beginX='418'
-					data-beginY='99.66'
-					className='hippo team2'
+					data-num='2'
+					href='#bird2'></use>
+				<use
+					id='team1-6'
+					className='mal bird team1'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					data-pos='start'
+					data-num='2'
+					href='#bird2'></use>
+				<use
+					id='team1-7'
+					className='mal bird team1'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					data-pos='start'
+					data-num='3'
+					href='#bird3'></use>
+				<use
+					id='team1-8'
+					className='mal bird team1'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					data-pos='start'
+					data-num='4'
+					href='#bird4'></use>
+				<use
+					id='team2-1'
+					className='mal hippo team2'
 					x='418'
 					y='99.66'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#hippo'></use>
 				<use
 					id='team2-2'
-					data-pos='start'
-					data-beginX='458'
-					data-beginY='99.66'
-					className='hippo team2'
+					className='mal hippo team2'
 					x='458'
 					y='99.66'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#hippo'></use>
 				<use
 					id='team2-3'
-					data-pos='start'
-					data-beginX='498'
-					data-beginY='99.66'
-					className='hippo team2'
+					className='mal hippo team2'
 					x='498'
 					y='99.66'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#hippo'></use>
 				<use
 					id='team2-4'
-					data-pos='start'
-					data-beginX='538'
-					data-beginY='99.66'
-					className='hippo team2'
+					className='mal hippo team2'
 					x='538'
 					y='99.66'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#hippo'></use>
+				<use
+					id='team2-5'
+					className='mal hippo team2'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					data-pos='start'
+					data-num='2'
+					href='#hippo2'></use>
+				<use
+					id='team2-6'
+					className='mal hippo team2'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					data-pos='start'
+					data-num='2'
+					href='#hippo2'></use>
+				<use
+					id='team2-7'
+					className='mal hippo team2'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					data-pos='start'
+					data-num='3'
+					href='#hippo3'></use>
+				<use
+					id='team2-8'
+					className='mal hippo team2'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					data-pos='start'
+					data-num='4'
+					href='#hippo4'></use>
 				{teamNum >= 3 && (
 					<>
 						<use
 							id='team3-1'
-							data-pos='start'
-							data-beginX='418'
-							data-beginY='166.32'
-							className='dragon team3'
+							className='mal dragon team3'
 							x='418'
 							y='166.32'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#dragon'></use>
 						<use
 							id='team3-2'
-							data-pos='start'
-							data-beginX='458'
-							data-beginY='166.32'
-							className='dragon team3'
+							className='mal dragon team3'
 							x='458'
 							y='166.32'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#dragon'></use>
 						<use
 							id='team3-3'
-							data-pos='start'
-							data-beginX='498'
-							data-beginY='166.32'
-							className='dragon team3'
+							className='mal dragon team3'
 							x='498'
 							y='166.32'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#dragon'></use>
 						<use
 							id='team3-4'
-							data-pos='start'
-							data-beginX='538'
-							data-beginY='166.32'
-							className='dragon team3'
+							className='mal dragon team3'
 							x='538'
 							y='166.32'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#dragon'></use>
+						<use
+							id='team3-5'
+							className='mal dragon team3'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='2'
+							href='#dragon2'></use>
+						<use
+							id='team3-6'
+							className='mal dragon team3'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='2'
+							href='#dragon2'></use>
+						<use
+							id='team3-7'
+							className='mal dragon team3'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='3'
+							href='#dragon3'></use>
+						<use
+							id='team3-8'
+							className='mal dragon team3'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='4'
+							href='#dragon4'></use>
 					</>
 				)}
 				{teamNum >= 4 && (
 					<>
 						<use
 							id='team4-1'
-							data-pos='start'
-							data-beginX='418'
-							data-beginY='232.98'
-							className='cat team4'
+							className='mal cat team4'
 							x='418'
 							y='232.98'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#cat'></use>
 						<use
 							id='team4-2'
-							data-pos='start'
-							data-beginX='458'
-							data-beginY='232.98'
-							className='cat team4'
+							className='mal cat team4'
 							x='458'
 							y='232.98'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#cat'></use>
 						<use
 							id='team4-3'
-							data-pos='start'
-							data-beginX='498'
-							data-beginY='232.98'
-							className='cat team4'
+							className='mal cat team4'
 							x='498'
 							y='232.98'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#cat'></use>
 						<use
 							id='team4-4'
-							data-pos='start'
-							data-beginX='538'
-							data-beginY='232.98'
-							className='cat team4'
+							className='mal cat team4'
 							x='538'
 							y='232.98'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#cat'></use>
+						<use
+							id='team4-5'
+							className='mal cat team4'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='2'
+							href='#cat2'></use>
+						<use
+							id='team4-6'
+							className='mal cat team4'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='2'
+							href='#cat2'></use>
+						<use
+							id='team4-7'
+							className='mal cat team4'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='3'
+							href='#cat3'></use>
+						<use
+							id='team4-8'
+							className='mal cat team4'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='4'
+							href='#cat4'></use>
 					</>
 				)}
 				{teamNum >= 5 && (
 					<>
 						<use
 							id='team5-1'
-							data-pos='start'
-							data-beginX='418'
-							data-beginY='299.64'
-							className='horse team5'
+							className='mal horse team5'
 							x='418'
 							y='299.64'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#horse'></use>
 						<use
 							id='team5-2'
-							data-pos='start'
-							data-beginX='458'
-							data-beginY='299.64'
-							className='horse team5'
+							className='mal horse team5'
 							x='458'
 							y='299.64'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#horse'></use>
 						<use
 							id='team5-3'
-							data-pos='start'
-							data-beginX='498'
-							data-beginY='299.64'
-							className='horse team5'
+							className='mal horse team5'
 							x='498'
 							y='299.64'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#horse'></use>
 						<use
 							id='team5-4'
-							data-pos='start'
-							data-beginX='538'
-							data-beginY='299.64'
-							className='horse team5'
+							className='mal horse team5'
 							x='538'
 							y='299.64'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#horse'></use>
+						<use
+							id='team5-5'
+							className='mal horse team5'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='2'
+							href='#horse2'></use>
+						<use
+							id='team5-6'
+							className='mal horse team5'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='2'
+							href='#horse2'></use>
+						<use
+							id='team5-7'
+							className='mal horse team5'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='3'
+							href='#horse3'></use>
+						<use
+							id='team5-8'
+							className='mal horse team5'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='4'
+							href='#horse4'></use>
 					</>
 				)}
 				{teamNum >= 6 && (
 					<>
 						<use
 							id='team6-1'
-							data-pos='start'
-							data-beginX='418'
-							data-beginY='366.3'
-							className='fish team6'
+							className='mal fish team6'
 							x='418'
 							y='366.3'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#fish'></use>
 						<use
 							id='team6-2'
-							data-pos='start'
-							data-beginX='458'
-							data-beginY='366.3'
-							className='fish team6'
+							className='mal fish team6'
 							x='458'
 							y='366.3'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#fish'></use>
 						<use
 							id='team6-3'
-							data-pos='start'
-							data-beginX='498'
-							data-beginY='366.3'
-							className='fish team6'
+							className='mal fish team6'
 							x='498'
 							y='366.3'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#fish'></use>
 						<use
 							id='team6-4'
-							data-pos='start'
-							data-beginX='538'
-							data-beginY='366.3'
-							className='fish team6'
+							className='mal fish team6'
 							x='538'
 							y='366.3'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#fish'></use>
+						<use
+							id='team6-5'
+							className='mal fish team6'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='2'
+							href='#fish2'></use>
+						<use
+							id='team6-6'
+							className='mal fish team6'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='2'
+							href='#fish2'></use>
+						<use
+							id='team6-7'
+							className='mal fish team6'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='3'
+							href='#fish3'></use>
+						<use
+							id='team6-8'
+							className='mal fish team6'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							data-pos='start'
+							data-num='4'
+							href='#fish4'></use>
 					</>
 				)}
 			</svg>
+
+			<Box component='span' sx={{ '& button': { m: 2 } }}>
+				<Button id='nextTurn' variant='contained' color='primary' size='large' onClick={nextTurn}>
+					다음턴
+				</Button>
+				{canPass ? (
+					<Button variant='contained' color='success' size='large' onClick={pass}>
+						나기
+					</Button>
+				) : (
+					<Button variant='contained' color='success' size='large' disabled>
+						나기
+					</Button>
+				)}
+				<Button id='rollback' variant='contained' color='error' size='large'>
+					무르기
+				</Button>
+			</Box>
+
+			{!!gameEnd && <Victory teamName={`팀 ${currentTurn.replace('team', '')}`} />}
 		</div>
 	);
 };

@@ -18,13 +18,13 @@ const GameBoard = () => {
 	const [canPass, setCanPass] = useState(false);
 	const [passableId, setPassableId] = useState();
 	const [gameEnd, setGameEnd] = useState(false);
-	const [hasHistory, setHasHistory] = useState(false);
 	const [openHistoryAlert, setOpenHistoryAlert] = useState(false);
+	const [canRollback, setCanRollback] = useState(false);
 
 	// 게임 세팅
 	const setGame = () => {
 		if (localStorage.getItem('history') !== null && JSON.parse(localStorage.getItem('history')).length > 1) {
-			setHasHistory(true);
+			setOpenHistoryAlert(true);
 		} else {
 			localStorage.removeItem('history');
 			saveHistory();
@@ -255,7 +255,7 @@ const GameBoard = () => {
 	};
 
 	// 팀 로테이션
-	const nextTurn = () => {
+	const nextTurn = async () => {
 		const next = teamRoster.get(currentTurn);
 
 		iterateTeamMal(currentTurn, stopDraggable);
@@ -263,9 +263,9 @@ const GameBoard = () => {
 
 		const checkmark = SVG('#check');
 		const posY = checkmark.node.getAttribute('y');
-		checkmark.move(435, Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66);
+		await checkmark.move(435, Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66);
 
-		setTimeout(() => saveHistory(), 100);
+		saveHistory();
 	};
 
 	useEffect(() => {
@@ -466,9 +466,7 @@ const GameBoard = () => {
 		history.currentTurn = currentTurn;
 
 		const checkmark = SVG('#check');
-		const posY = checkmark.node.getAttribute('y');
-		const y = Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66;
-		history.checkmark = { x: 435, y };
+		history.checkmark = { x: 435, y: checkmark.node.getAttribute('y') };
 
 		history.pieces = [];
 		const pieces = document.getElementsByClassName('mal');
@@ -478,7 +476,7 @@ const GameBoard = () => {
 			history.pieces.push({
 				id: pieces[i].id,
 				dataPos: mal.getAttribute('data-pos'),
-				classList: mal.classList,
+				classList: mal.classList.value,
 				x: mal.getAttribute('x'),
 				y: mal.getAttribute('y'),
 			});
@@ -499,12 +497,48 @@ const GameBoard = () => {
 		const historyData = JSON.parse(localStorage.getItem('history') || '[]');
 		historyData.push(history);
 		localStorage.setItem('history', JSON.stringify(historyData));
-		console.log(historyData);
+
+		if (historyData.length > 1) {
+			setCanRollback(true);
+		}
 	};
 
-	const setHistory = () => {};
+	// 가장 최근 히스토리를 가져와서 set한다.
+	const setHistory = () => {
+		const historyData = JSON.parse(localStorage.getItem('history') || '[]');
+		const recent = historyData[historyData.length - 1];
 
-	const rollback = () => {};
+		if (currentTurn !== recent.currentTurn) {
+			iterateTeamMal(currentTurn, stopDraggable);
+			setCurrentTurn(recent.currentTurn);
+		}
+
+		const checkmark = SVG('#check');
+		const { x, y } = recent.checkmark;
+		checkmark.move(x, y);
+
+		const pieces = recent.pieces;
+		const len1 = pieces.length;
+		for (var i = 0; i < len1; i++) {
+			const mal = document.getElementById(pieces[i].id);
+			mal.setAttribute('data-pos', pieces[i].dataPos);
+			mal.classList = pieces[i].classList;
+			SVG(`#${pieces[i].id}`).move(pieces[i].x, pieces[i].y);
+		}
+	};
+
+	// 최근 히스토리를 pop하고, 바로 이전 히스토리를 set한다.
+	const rollback = () => {
+		const historyData = JSON.parse(localStorage.getItem('history') || '[]');
+
+		historyData.pop();
+		if (historyData.length <= 1) {
+			setCanRollback(false);
+		}
+		localStorage.setItem('history', JSON.stringify(historyData));
+
+		setHistory();
+	};
 
 	return (
 		<div id='game'>
@@ -1514,28 +1548,13 @@ const GameBoard = () => {
 						나기
 					</Button>
 				)}
-				<Button id='rollback' variant='contained' color='error' size='large' onClick={saveHistory}>
-					무르기
-				</Button>
-			</Box>
-			<Box sx={{ '& button': { m: 2 } }}>
-				<Button
-					variant='contained'
-					color='primary'
-					size='large'
-					onClick={() => {
-						localStorage.removeItem('history');
-						location.reload();
-					}}>
-					초기화
-				</Button>
-				{hasHistory ? (
-					<Button variant='contained' color='success' size='large' onClick={() => setOpenHistoryAlert(true)}>
-						세이브 불러오기
+				{canRollback ? (
+					<Button id='rollback' variant='contained' color='error' size='large' onClick={rollback}>
+						무르기
 					</Button>
 				) : (
-					<Button id='getHistory' variant='contained' color='success' size='large' disabled>
-						세이브 불러오기
+					<Button id='rollback' variant='contained' color='error' size='large' disabled>
+						무르기
 					</Button>
 				)}
 			</Box>
@@ -1543,8 +1562,11 @@ const GameBoard = () => {
 			{!!gameEnd && <Victory teamName={`팀 ${currentTurn.replace('team', '')}`} />}
 			{!!openHistoryAlert && (
 				<HistoryAlert
-					setHistory={() => {}}
-					saveHistory={() => saveHistory()}
+					setHistory={() => {
+						setHistory();
+						setCanRollback(true);
+					}}
+					saveHistory={saveHistory}
 					close={() => setOpenHistoryAlert(false)}
 				/>
 			)}

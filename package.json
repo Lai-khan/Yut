@@ -17,7 +17,7 @@
 	"bugs": {
 		"url": "https://github.com/Lai-khan/Yut/issues"
 	},
-	"homepage": "https://github.com/Lai-khan/Yut#readme",
+	"homepage": "https://main--korean-yut.netlify.app/",
 	"dependencies": {
 		"@emotion/react": "^11.10.6",
 		"@emotion/styled": "^11.10.6",
@@ -36,6 +36,7 @@
 		"@babel/preset-react": "^7.18.6",
 		"babel-loader": "^9.1.2",
 		"clean-webpack-plugin": "^4.0.0",
+		"copy-webpack-plugin": "^11.0.0",
 		"css-loader": "^6.7.3",
 		"html-webpack-plugin": "^5.5.0",
 		"style-loader": "^3.3.1",

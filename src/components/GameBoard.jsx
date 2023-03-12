@@ -3,6 +3,7 @@ import { SVG } from '@svgdotjs/svg.js';
 import '@svgdotjs/svg.draggable.js';
 import { Box, Button } from '@mui/material';
 import Victory from './Victory';
+import HistoryAlert from './HistoryAlert';
 
 import '../style/GameBoard.css';
 
@@ -17,9 +18,18 @@ const GameBoard = () => {
 	const [canPass, setCanPass] = useState(false);
 	const [passableId, setPassableId] = useState();
 	const [gameEnd, setGameEnd] = useState(false);
+	const [hasHistory, setHasHistory] = useState(false);
+	const [openHistoryAlert, setOpenHistoryAlert] = useState(false);
 
 	// 게임 세팅
 	const setGame = () => {
+		if (localStorage.getItem('history') !== null && JSON.parse(localStorage.getItem('history')).length > 1) {
+			setHasHistory(true);
+		} else {
+			localStorage.removeItem('history');
+			saveHistory();
+		}
+
 		for (var i = 1; i <= teamNum; i++) {
 			teamRoster.set(`team${i}`, `team${i == teamNum ? 1 : i + 1}`);
 		}
@@ -225,6 +235,8 @@ const GameBoard = () => {
 			checkCatch(nextPos);
 			checkJoin(id, nextPos);
 			checkPass();
+
+			setTimeout(() => saveHistory(), 100);
 		});
 	};
 
@@ -252,6 +264,8 @@ const GameBoard = () => {
 		const checkmark = SVG('#check');
 		const posY = checkmark.node.getAttribute('y');
 		checkmark.move(435, Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66);
+
+		setTimeout(() => saveHistory(), 100);
 	};
 
 	useEffect(() => {
@@ -417,9 +431,11 @@ const GameBoard = () => {
 
 		setCanPass(false);
 
-		setTimeout(() => checkVictory(), 1000);
+		setTimeout(() => saveHistory(), 100);
+		setTimeout(() => checkVictory(), 100);
 	};
 
+	// 게임 승리 조건
 	const checkVictory = () => {
 		const pieces = Array.from(document.getElementsByClassName(currentTurn));
 		let isEnd = true;
@@ -434,6 +450,61 @@ const GameBoard = () => {
 			setGameEnd(true);
 		}
 	};
+
+	/**
+	 * 히스토리
+	 * {
+	 * 	currentTurn: currentTurn,
+	 * 	pieces: {},
+	 * 	statusBoard: {},
+	 * 	checkmark: {}
+	 * }
+	 */
+	const saveHistory = () => {
+		let history = new Object();
+
+		history.currentTurn = currentTurn;
+
+		const checkmark = SVG('#check');
+		const posY = checkmark.node.getAttribute('y');
+		const y = Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66;
+		history.checkmark = { x: 435, y };
+
+		history.pieces = [];
+		const pieces = document.getElementsByClassName('mal');
+		const len1 = pieces.length;
+		for (var i = 0; i < len1; i++) {
+			const mal = document.getElementById(pieces[i].id);
+			history.pieces.push({
+				id: pieces[i].id,
+				dataPos: mal.getAttribute('data-pos'),
+				classList: mal.classList,
+				x: mal.getAttribute('x'),
+				y: mal.getAttribute('y'),
+			});
+		}
+
+		history.statusBoard = [];
+		const statusBoards = document.getElementsByClassName('statusBoard');
+		const len2 = statusBoards.length;
+		for (var i = 0; i < len2; i++) {
+			const board = document.getElementById(statusBoards[i].id);
+			history.statusBoard.push({
+				id: statusBoards[i].id,
+				strokeColor: board.getAttribute('stroke'),
+				strokeWidth: board.getAttribute('stroke-width'),
+			});
+		}
+
+		const historyData = JSON.parse(localStorage.getItem('history') || '[]');
+		historyData.push(history);
+		localStorage.setItem('history', JSON.stringify(historyData));
+		console.log(historyData);
+	};
+
+	const setHistory = () => {};
+
+	const rollback = () => {};
 
 	return (
 		<div id='game'>
@@ -559,28 +630,136 @@ const GameBoard = () => {
 				<text x='405' y='20' className='middle'>
 					1팀
 				</text>
-				<circle id='start1-1' cx='430' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle id='start1-2' cx='470' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle id='start1-3' cx='510' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle id='start1-4' cx='550' cy='45' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle
+					id='start1-1'
+					className='statusBoard'
+					cx='430'
+					cy='45'
+					r='12'
+					stroke='gray'
+					strokeWidth='1.5'
+					fill='none'
+				/>
+				<circle
+					id='start1-2'
+					className='statusBoard'
+					cx='470'
+					cy='45'
+					r='12'
+					stroke='gray'
+					strokeWidth='1.5'
+					fill='none'
+				/>
+				<circle
+					id='start1-3'
+					className='statusBoard'
+					cx='510'
+					cy='45'
+					r='12'
+					stroke='gray'
+					strokeWidth='1.5'
+					fill='none'
+				/>
+				<circle
+					id='start1-4'
+					className='statusBoard'
+					cx='550'
+					cy='45'
+					r='12'
+					stroke='gray'
+					strokeWidth='1.5'
+					fill='none'
+				/>
 				<rect x='400' y='66.66' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
 				<text x='405' y='86.66' className='middle'>
 					2팀
 				</text>
-				<circle id='start2-1' cx='430' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle id='start2-2' cx='470' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle id='start2-3' cx='510' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-				<circle id='start2-4' cx='550' cy='111.66' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+				<circle
+					id='start2-1'
+					className='statusBoard'
+					cx='430'
+					cy='111.66'
+					r='12'
+					stroke='gray'
+					strokeWidth='1.5'
+					fill='none'
+				/>
+				<circle
+					id='start2-2'
+					className='statusBoard'
+					cx='470'
+					cy='111.66'
+					r='12'
+					stroke='gray'
+					strokeWidth='1.5'
+					fill='none'
+				/>
+				<circle
+					id='start2-3'
+					className='statusBoard'
+					cx='510'
+					cy='111.66'
+					r='12'
+					stroke='gray'
+					strokeWidth='1.5'
+					fill='none'
+				/>
+				<circle
+					id='start2-4'
+					className='statusBoard'
+					cx='550'
+					cy='111.66'
+					r='12'
+					stroke='gray'
+					strokeWidth='1.5'
+					fill='none'
+				/>
 				{teamNum >= 3 && (
 					<>
 						<rect x='400' y='133.32' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
 						<text x='405' y='153.32' className='middle'>
 							3팀
 						</text>
-						<circle id='start3-1' cx='430' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start3-2' cx='470' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start3-3' cx='510' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start3-4' cx='550' cy='178.32' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle
+							id='start3-1'
+							className='statusBoard'
+							cx='430'
+							cy='178.32'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start3-2'
+							className='statusBoard'
+							cx='470'
+							cy='178.32'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start3-3'
+							className='statusBoard'
+							cx='510'
+							cy='178.32'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start3-4'
+							className='statusBoard'
+							cx='550'
+							cy='178.32'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
 					</>
 				)}
 				{teamNum >= 4 && (
@@ -589,10 +768,46 @@ const GameBoard = () => {
 						<text x='405' y='219.98' className='middle'>
 							4팀
 						</text>
-						<circle id='start4-1' cx='430' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start4-2' cx='470' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start4-3' cx='510' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start4-4' cx='550' cy='244.98' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle
+							id='start4-1'
+							className='statusBoard'
+							cx='430'
+							cy='244.98'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start4-2'
+							className='statusBoard'
+							cx='470'
+							cy='244.98'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start4-3'
+							className='statusBoard'
+							cx='510'
+							cy='244.98'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start4-4'
+							className='statusBoard'
+							cx='550'
+							cy='244.98'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
 					</>
 				)}
 				{teamNum >= 5 && (
@@ -601,10 +816,46 @@ const GameBoard = () => {
 						<text x='405' y='286.64' className='middle'>
 							5팀
 						</text>
-						<circle id='start5-1' cx='430' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start5-2' cx='470' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start5-3' cx='510' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start5-4' cx='550' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle
+							id='start5-1'
+							className='statusBoard'
+							cx='430'
+							cy='311.64'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start5-2'
+							className='statusBoard'
+							cx='470'
+							cy='311.64'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start5-3'
+							className='statusBoard'
+							cx='510'
+							cy='311.64'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start5-4'
+							className='statusBoard'
+							cx='550'
+							cy='311.64'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
 					</>
 				)}
 				{teamNum >= 6 && (
@@ -613,10 +864,46 @@ const GameBoard = () => {
 						<text x='405' y='353.3' className='middle'>
 							6팀
 						</text>
-						<circle id='start6-1' cx='430' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start6-2' cx='470' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start6-3' cx='510' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
-						<circle id='start6-4' cx='550' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle
+							id='start6-1'
+							className='statusBoard'
+							cx='430'
+							cy='378.3'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start6-2'
+							className='statusBoard'
+							cx='470'
+							cy='378.3'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start6-3'
+							className='statusBoard'
+							cx='510'
+							cy='378.3'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
+						<circle
+							id='start6-4'
+							className='statusBoard'
+							cx='550'
+							cy='378.3'
+							r='12'
+							stroke='gray'
+							strokeWidth='1.5'
+							fill='none'
+						/>
 					</>
 				)}
 
@@ -1214,7 +1501,7 @@ const GameBoard = () => {
 				)}
 			</svg>
 
-			<Box component='span' sx={{ '& button': { m: 2 } }}>
+			<Box sx={{ '& button': { m: 2 } }}>
 				<Button id='nextTurn' variant='contained' color='primary' size='large' onClick={nextTurn}>
 					다음턴
 				</Button>
@@ -1227,12 +1514,40 @@ const GameBoard = () => {
 						나기
 					</Button>
 				)}
-				<Button id='rollback' variant='contained' color='error' size='large'>
+				<Button id='rollback' variant='contained' color='error' size='large' onClick={saveHistory}>
 					무르기
 				</Button>
 			</Box>
+			<Box sx={{ '& button': { m: 2 } }}>
+				<Button
+					variant='contained'
+					color='primary'
+					size='large'
+					onClick={() => {
+						localStorage.removeItem('history');
+						location.reload();
+					}}>
+					초기화
+				</Button>
+				{hasHistory ? (
+					<Button variant='contained' color='success' size='large' onClick={() => setOpenHistoryAlert(true)}>
+						세이브 불러오기
+					</Button>
+				) : (
+					<Button id='getHistory' variant='contained' color='success' size='large' disabled>
+						세이브 불러오기
+					</Button>
+				)}
+			</Box>
 
 			{!!gameEnd && <Victory teamName={`팀 ${currentTurn.replace('team', '')}`} />}
+			{!!openHistoryAlert && (
+				<HistoryAlert
+					setHistory={() => {}}
+					saveHistory={() => saveHistory()}
+					close={() => setOpenHistoryAlert(false)}
+				/>
+			)}
 		</div>
 	);
 };

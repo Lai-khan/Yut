@@ -89,27 +89,57 @@ const GameBoard = () => {
 		startPos.set('team1-2', { x: 458, y: 33 });
 		startPos.set('team1-3', { x: 498, y: 33 });
 		startPos.set('team1-4', { x: 538, y: 33 });
+		startPos.set('team1-5', { x: -20, y: -20 });
+		startPos.set('team1-6', { x: -20, y: -20 });
+		startPos.set('team1-7', { x: -20, y: -20 });
+		startPos.set('team1-8', { x: -20, y: -20 });
 		startPos.set('team2-1', { x: 418, y: 99.66 });
 		startPos.set('team2-2', { x: 458, y: 99.66 });
 		startPos.set('team2-3', { x: 498, y: 99.66 });
 		startPos.set('team2-4', { x: 538, y: 99.66 });
+		startPos.set('team2-5', { x: -20, y: -20 });
+		startPos.set('team2-6', { x: -20, y: -20 });
+		startPos.set('team2-7', { x: -20, y: -20 });
+		startPos.set('team2-8', { x: -20, y: -20 });
 		if (teamNum >= 3) {
 			startPos.set('team3-1', { x: 418, y: 166.32 });
 			startPos.set('team3-2', { x: 458, y: 166.32 });
 			startPos.set('team3-3', { x: 498, y: 166.32 });
 			startPos.set('team3-4', { x: 538, y: 166.32 });
+			startPos.set('team3-5', { x: -20, y: -20 });
+			startPos.set('team3-6', { x: -20, y: -20 });
+			startPos.set('team3-7', { x: -20, y: -20 });
+			startPos.set('team3-8', { x: -20, y: -20 });
 		}
 		if (teamNum >= 4) {
 			startPos.set('team4-1', { x: 418, y: 232.98 });
 			startPos.set('team4-2', { x: 458, y: 232.98 });
 			startPos.set('team4-3', { x: 498, y: 232.98 });
 			startPos.set('team4-4', { x: 538, y: 232.98 });
+			startPos.set('team4-5', { x: -20, y: -20 });
+			startPos.set('team4-6', { x: -20, y: -20 });
+			startPos.set('team4-7', { x: -20, y: -20 });
+			startPos.set('team4-8', { x: -20, y: -20 });
 		}
 		if (teamNum >= 5) {
 			startPos.set('team5-1', { x: 418, y: 299.64 });
 			startPos.set('team5-2', { x: 458, y: 299.64 });
 			startPos.set('team5-3', { x: 498, y: 299.64 });
 			startPos.set('team5-4', { x: 538, y: 299.64 });
+			startPos.set('team5-5', { x: -20, y: -20 });
+			startPos.set('team5-6', { x: -20, y: -20 });
+			startPos.set('team5-7', { x: -20, y: -20 });
+			startPos.set('team5-8', { x: -20, y: -20 });
+		}
+		if (teamNum >= 6) {
+			startPos.set('team6-1', { x: 418, y: 366.3 });
+			startPos.set('team6-2', { x: 458, y: 366.3 });
+			startPos.set('team6-3', { x: 498, y: 366.3 });
+			startPos.set('team6-4', { x: 538, y: 366.3 });
+			startPos.set('team6-5', { x: -20, y: -20 });
+			startPos.set('team6-6', { x: -20, y: -20 });
+			startPos.set('team6-7', { x: -20, y: -20 });
+			startPos.set('team6-8', { x: -20, y: -20 });
 		}
 	};
 
@@ -200,7 +230,7 @@ const GameBoard = () => {
 	const stopDraggable = async (id) => {
 		const element = await SVG(`#${id}`);
 
-		console.log(element);
+		element.draggable(false);
 	};
 
 	const iterateTeamMal = (className, callback) => {
@@ -279,7 +309,7 @@ const GameBoard = () => {
 		target.move(x, y);
 		target.removeClass(currentTurn);
 		target.draggable(false);
-		// 말이 업어져 있다면 업은 말 모두 나야하고, 업은 말은 따로 안보이게 처리해야 한다.
+		// 말을 업고 있다면 업은 말 모두 나야하고, 업은 말은 따로 안보이게 처리해야 한다.
 
 		checkVictory();
 
@@ -611,6 +641,42 @@ const GameBoard = () => {
 					height='24'
 					href='#bird'></use>
 				<use
+					id='team1-5'
+					data-pos='start'
+					className='mal bird team1'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					href='#bird2'></use>
+				<use
+					id='team1-6'
+					data-pos='start'
+					className='mal bird team1'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					href='#bird2'></use>
+				<use
+					id='team1-7'
+					data-pos='start'
+					className='mal bird team1'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					href='#bird3'></use>
+				<use
+					id='team1-8'
+					data-pos='start'
+					className='mal bird team1'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					href='#bird4'></use>
+				<use
 					id='team2-1'
 					data-pos='start'
 					className='mal hippo team2'
@@ -646,6 +712,42 @@ const GameBoard = () => {
 					width='24'
 					height='24'
 					href='#hippo'></use>
+				<use
+					id='team2-5'
+					data-pos='start'
+					className='mal hippo team2'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					href='#hippo2'></use>
+				<use
+					id='team2-6'
+					data-pos='start'
+					className='mal hippo team2'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					href='#hippo2'></use>
+				<use
+					id='team2-7'
+					data-pos='start'
+					className='mal hippo team2'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					href='#hippo3'></use>
+				<use
+					id='team2-8'
+					data-pos='start'
+					className='mal hippo team2'
+					x='-20'
+					y='-20'
+					width='24'
+					height='24'
+					href='#hippo4'></use>
 				{teamNum >= 3 && (
 					<>
 						<use
@@ -684,6 +786,42 @@ const GameBoard = () => {
 							width='24'
 							height='24'
 							href='#dragon'></use>
+						<use
+							id='team3-5'
+							data-pos='start'
+							className='mal dragon team3'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#dragon2'></use>
+						<use
+							id='team3-6'
+							data-pos='start'
+							className='mal dragon team3'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#dragon2'></use>
+						<use
+							id='team3-7'
+							data-pos='start'
+							className='mal dragon team3'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#dragon3'></use>
+						<use
+							id='team3-8'
+							data-pos='start'
+							className='mal dragon team3'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#dragon4'></use>
 					</>
 				)}
 				{teamNum >= 4 && (
@@ -724,6 +862,42 @@ const GameBoard = () => {
 							width='24'
 							height='24'
 							href='#cat'></use>
+						<use
+							id='team4-5'
+							data-pos='start'
+							className='mal cat team4'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#cat2'></use>
+						<use
+							id='team4-6'
+							data-pos='start'
+							className='mal cat team4'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#cat2'></use>
+						<use
+							id='team4-7'
+							data-pos='start'
+							className='mal cat team4'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#cat3'></use>
+						<use
+							id='team4-8'
+							data-pos='start'
+							className='mal cat team4'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#cat4'></use>
 					</>
 				)}
 				{teamNum >= 5 && (
@@ -764,6 +938,42 @@ const GameBoard = () => {
 							width='24'
 							height='24'
 							href='#horse'></use>
+						<use
+							id='team5-5'
+							data-pos='start'
+							className='mal horse team5'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#horse2'></use>
+						<use
+							id='team5-6'
+							data-pos='start'
+							className='mal horse team5'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#horse2'></use>
+						<use
+							id='team5-7'
+							data-pos='start'
+							className='mal horse team5'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#horse3'></use>
+						<use
+							id='team5-8'
+							data-pos='start'
+							className='mal horse team5'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#horse4'></use>
 					</>
 				)}
 				{teamNum >= 6 && (
@@ -771,7 +981,7 @@ const GameBoard = () => {
 						<use
 							id='team6-1'
 							data-pos='start'
-							className='fish team6'
+							className='mal fish team6'
 							x='418'
 							y='366.3'
 							width='24'
@@ -780,7 +990,7 @@ const GameBoard = () => {
 						<use
 							id='team6-2'
 							data-pos='start'
-							className='fish team6'
+							className='mal fish team6'
 							x='458'
 							y='366.3'
 							width='24'
@@ -789,7 +999,7 @@ const GameBoard = () => {
 						<use
 							id='team6-3'
 							data-pos='start'
-							className='fish team6'
+							className='mal fish team6'
 							x='498'
 							y='366.3'
 							width='24'
@@ -798,12 +1008,48 @@ const GameBoard = () => {
 						<use
 							id='team6-4'
 							data-pos='start'
-							className='fish team6'
+							className='mal fish team6'
 							x='538'
 							y='366.3'
 							width='24'
 							height='24'
 							href='#fish'></use>
+						<use
+							id='team6-5'
+							data-pos='start'
+							className='mal fish team6'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#fish2'></use>
+						<use
+							id='team6-6'
+							data-pos='start'
+							className='mal fish team6'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#fish2'></use>
+						<use
+							id='team6-7'
+							data-pos='start'
+							className='mal fish team6'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#fish3'></use>
+						<use
+							id='team6-8'
+							data-pos='start'
+							className='mal fish team6'
+							x='-20'
+							y='-20'
+							width='24'
+							height='24'
+							href='#fish4'></use>
 					</>
 				)}
 			</svg>

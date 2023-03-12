@@ -465,26 +465,110 @@ const GameBoard = () => {
 						<circle id='start5-4' cx='550' cy='311.64' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
 					</>
 				)}
+				{teamNum >= 6 && (
+					<>
+						<rect x='400' y='333.3' width='178' height='66.66' stroke='black' fill='none' strokeWidth='0.2' />
+						<text x='405' y='353.3' className='middle'>
+							6팀
+						</text>
+						<circle id='start6-1' cx='430' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start6-2' cx='470' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start6-3' cx='510' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+						<circle id='start6-4' cx='550' cy='378.3' r='12' stroke='gray' strokeWidth='1.5' fill='none' />
+					</>
+				)}
 
 				{/* 말 */}
 				<defs>
 					<symbol id='bird' viewBox='0 0 20 20'>
 						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
 					</symbol>
+					<symbol id='bird2' viewBox='0 0 20 20'>
+						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='bird3' viewBox='0 0 20 20'>
+						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='bird4' viewBox='0 0 20 20'>
+						<image href='./images/dove-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
+					</symbol>
 					<symbol id='hippo' viewBox='0 0 20 20'>
 						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
+					</symbol>
+					<symbol id='hippo2' viewBox='0 0 20 20'>
+						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='hippo3' viewBox='0 0 20 20'>
+						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='hippo4' viewBox='0 0 20 20'>
+						<image href='./images/hippo-solid.svg' x='2' y='2' height='16' width='16' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
 					</symbol>
 					<symbol id='dragon' viewBox='0 0 20 20'>
 						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
 					</symbol>
+					<symbol id='dragon2' viewBox='0 0 20 20'>
+						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='dragon3' viewBox='0 0 20 20'>
+						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='dragon4' viewBox='0 0 20 20'>
+						<image href='./images/dragon-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
+					</symbol>
 					<symbol id='cat' viewBox='0 0 20 20'>
 						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
+					</symbol>
+					<symbol id='cat2' viewBox='0 0 20 20'>
+						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='cat3' viewBox='0 0 20 20'>
+						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='cat4' viewBox='0 0 20 20'>
+						<image href='./images/cat-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
 					</symbol>
 					<symbol id='horse' viewBox='0 0 20 20'>
 						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
 					</symbol>
+					<symbol id='horse2' viewBox='0 0 20 20'>
+						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='horse3' viewBox='0 0 20 20'>
+						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='horse4' viewBox='0 0 20 20'>
+						<image href='./images/horse-solid.svg' x='2' y='3' height='14' width='14' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
+					</symbol>
 					<symbol id='fish' viewBox='0 0 20 20'>
 						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
+					</symbol>
+					<symbol id='fish2' viewBox='0 0 20 20'>
+						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-2.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='fish3' viewBox='0 0 20 20'>
+						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-3.png' x='0' y='0' height='10' width='10' />
+					</symbol>
+					<symbol id='fish4' viewBox='0 0 20 20'>
+						<image href='./images/fish-solid.svg' x='3' y='3' height='14' width='14' />
+						<image href='./images/number-4.png' x='0' y='0' height='10' width='10' />
 					</symbol>
 				</defs>
 
@@ -680,6 +764,46 @@ const GameBoard = () => {
 							width='24'
 							height='24'
 							href='#horse'></use>
+					</>
+				)}
+				{teamNum >= 6 && (
+					<>
+						<use
+							id='team6-1'
+							data-pos='start'
+							className='fish team6'
+							x='418'
+							y='366.3'
+							width='24'
+							height='24'
+							href='#fish'></use>
+						<use
+							id='team6-2'
+							data-pos='start'
+							className='fish team6'
+							x='458'
+							y='366.3'
+							width='24'
+							height='24'
+							href='#fish'></use>
+						<use
+							id='team6-3'
+							data-pos='start'
+							className='fish team6'
+							x='498'
+							y='366.3'
+							width='24'
+							height='24'
+							href='#fish'></use>
+						<use
+							id='team6-4'
+							data-pos='start'
+							className='fish team6'
+							x='538'
+							y='366.3'
+							width='24'
+							height='24'
+							href='#fish'></use>
 					</>
 				)}
 			</svg>

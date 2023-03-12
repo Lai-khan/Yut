@@ -15,8 +15,13 @@ const Victory = ({ teamName }) => {
 			<Dialog fullScreen={fullScreen} open={true} aria-labelledby='responsive-dialog-title'>
 				<DialogTitle id='responsive-dialog-title'>`🎉🎉🎉{teamName} 우승!!🎉🎉🎉`</DialogTitle>
 				<DialogActions>
-					<Button onClick={() => (location.href = '/')} autoFocus>
-						홈페이지로 이동
+					<Button
+						onClick={() => {
+							localStorage.removeItem('history');
+							location.href = '/';
+						}}
+						autoFocus>
+						홈으로 이동
 					</Button>
 				</DialogActions>
 			</Dialog>

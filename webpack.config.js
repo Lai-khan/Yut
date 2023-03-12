@@ -34,7 +34,14 @@ module.exports = {
 			template: 'public/index.html',
 		}),
 		new CopyPlugin({
-			patterns: [{ from: 'public/images', to: 'images' }],
+			patterns: [
+				{
+					from: 'public',
+					globOptions: {
+						ignore: '**/index.html',
+					},
+				},
+			],
 		}),
 	],
 	devServer: {

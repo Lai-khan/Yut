@@ -43,7 +43,13 @@ const TeamNum = () => {
 				</Box>
 			</div>
 			<p style={{ marginTop: '20px' }}>최소 2 ~ 최대 6</p>
-			<Button id='nextBtn' variant='outlined' color='primary' size='large' href='/game'>
+			<Button
+				id='nextBtn'
+				variant='outlined'
+				color='primary'
+				size='large'
+				href='/game'
+				onClick={() => localStorage.removeItem('history')}>
 				다음
 			</Button>
 		</div>

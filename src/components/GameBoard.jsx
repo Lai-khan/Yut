@@ -525,6 +525,14 @@ const GameBoard = () => {
 			mal.classList = pieces[i].classList;
 			SVG(`#${pieces[i].id}`).move(pieces[i].x, pieces[i].y);
 		}
+
+		const statusBoards = recent.statusBoard;
+		const len2 = statusBoards.length;
+		for (var i = 0; i < len2; i++) {
+			const board = document.getElementById(statusBoards[i].id);
+			board.setAttribute('stroke', statusBoards[i].strokeColor);
+			board.setAttribute('stroke-width', statusBoards[i].strokeWidth);
+		}
 	};
 
 	// 최근 히스토리를 pop하고, 바로 이전 히스토리를 set한다.

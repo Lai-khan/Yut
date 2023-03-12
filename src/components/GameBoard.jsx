@@ -223,6 +223,7 @@ const GameBoard = () => {
 			e.target.dataset.pos = nextPos;
 
 			checkCatch(nextPos);
+			checkJoin(id, nextPos);
 			checkPass();
 		});
 	};
@@ -266,6 +267,7 @@ const GameBoard = () => {
 			const mal = document.getElementById(pieces[i].id);
 			if (mal.dataset.pos === posId && !mal.classList.contains(currentTurn)) {
 				reset(mal.id);
+				return;
 			}
 		}
 	};
@@ -277,6 +279,93 @@ const GameBoard = () => {
 		const { x, y } = startPos.get(id);
 		target.node.setAttribute('data-pos', 'start');
 		target.move(x, y);
+
+		// TODO 업은말 고려
+	};
+
+	// 말 업기
+	const checkJoin = (id, posId) => {
+		if (posId === 'start') {
+			return;
+		}
+
+		const pieces = document.getElementsByClassName(currentTurn);
+		const len = pieces.length;
+		for (var i = 0; i < len; i++) {
+			if (pieces[i].id === id) {
+				continue;
+			}
+
+			const mal = document.getElementById(pieces[i].id);
+			if (mal.dataset.pos === posId && mal.classList.contains(currentTurn)) {
+				join(id, pieces[i].id, posId);
+				return;
+			}
+		}
+	};
+
+	const join = async (id1, id2, posId) => {
+		const el1 = document.getElementById(id1);
+		const el2 = document.getElementById(id2);
+		const num = Number(el1.getAttribute('data-num')) + Number(el2.getAttribute('data-num'));
+
+		console.log('el1', el1);
+		console.log('el2', el2);
+		console.log('num', num);
+
+		let plural;
+		let includeStr;
+		const include1 = el1.getAttribute('data-include');
+		const include2 = el2.getAttribute('data-include');
+		if (num == 2) {
+			plural = await getDoublePiece();
+			includeStr = `${id1} ${id2}`;
+		} else if (num == 3) {
+			plural = await SVG(`#${currentTurn}-7`);
+
+			if (include1 === null) {
+				includeStr = `${id1} ${include2}`;
+			} else {
+				includeStr = `${id2} ${include1}`;
+			}
+		} else if (num == 4) {
+			plural = await SVG(`#${currentTurn}-8`);
+
+			if (include1 === null) {
+				includeStr = `${id1} ${include2}`;
+			} else if (include2 === null) {
+				includeStr = `${id2} ${include1}`;
+			} else {
+				includeStr = `${include1} ${include2}`;
+			}
+		} else {
+			return;
+		}
+
+		console.log('plural', plural);
+		const { sx, sy } = spaceInfo.get(posId);
+		plural.move(sx, sy);
+		plural.node.setAttribute('data-pos', posId);
+		plural.node.setAttribute('data-include', includeStr);
+		console.log(includeStr);
+
+		// 후처리 - 숨김처리
+		const svg1 = await SVG(`#${id1}`);
+		const svg2 = await SVG(`#${id2}`);
+		svg1.node.setAttribute('data-pos', 'start');
+		svg2.node.setAttribute('data-pos', 'start');
+		svg1.move(-20, -20);
+		svg2.move(-20, -20);
+	};
+
+	const getDoublePiece = () => {
+		const id = `${currentTurn}-5`;
+
+		if (document.getElementById(id).getAttribute('data-pos') === 'start') {
+			return SVG(`#${id}`);
+		}
+
+		return SVG(`#${currentTurn}-6`);
 	};
 
 	// 말 나기
@@ -309,7 +398,8 @@ const GameBoard = () => {
 		target.move(x, y);
 		target.removeClass(currentTurn);
 		target.draggable(false);
-		// 말을 업고 있다면 업은 말 모두 나야하고, 업은 말은 따로 안보이게 처리해야 한다.
+
+		// TODO 업은 말 고려
 
 		checkVictory();
 
@@ -606,221 +696,245 @@ const GameBoard = () => {
 
 				<use
 					id='team1-1'
-					data-pos='start'
 					className='mal bird team1'
 					x='418'
 					y='33'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#bird'></use>
 				<use
 					id='team1-2'
-					data-pos='start'
 					className='mal bird team1'
 					x='458'
 					y='33'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#bird'></use>
 				<use
 					id='team1-3'
-					data-pos='start'
 					className='mal bird team1'
 					x='498'
 					y='33'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#bird'></use>
 				<use
 					id='team1-4'
-					data-pos='start'
 					className='mal bird team1'
 					x='538'
 					y='33'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#bird'></use>
 				<use
 					id='team1-5'
-					data-pos='start'
 					className='mal bird team1'
 					x='-20'
 					y='-20'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='2'
 					href='#bird2'></use>
 				<use
 					id='team1-6'
-					data-pos='start'
 					className='mal bird team1'
 					x='-20'
 					y='-20'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='2'
 					href='#bird2'></use>
 				<use
 					id='team1-7'
-					data-pos='start'
 					className='mal bird team1'
 					x='-20'
 					y='-20'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='3'
 					href='#bird3'></use>
 				<use
 					id='team1-8'
-					data-pos='start'
 					className='mal bird team1'
 					x='-20'
 					y='-20'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='4'
 					href='#bird4'></use>
 				<use
 					id='team2-1'
-					data-pos='start'
 					className='mal hippo team2'
 					x='418'
 					y='99.66'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#hippo'></use>
 				<use
 					id='team2-2'
-					data-pos='start'
 					className='mal hippo team2'
 					x='458'
 					y='99.66'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#hippo'></use>
 				<use
 					id='team2-3'
-					data-pos='start'
 					className='mal hippo team2'
 					x='498'
 					y='99.66'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#hippo'></use>
 				<use
 					id='team2-4'
-					data-pos='start'
 					className='mal hippo team2'
 					x='538'
 					y='99.66'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='1'
 					href='#hippo'></use>
 				<use
 					id='team2-5'
-					data-pos='start'
 					className='mal hippo team2'
 					x='-20'
 					y='-20'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='2'
 					href='#hippo2'></use>
 				<use
 					id='team2-6'
-					data-pos='start'
 					className='mal hippo team2'
 					x='-20'
 					y='-20'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='2'
 					href='#hippo2'></use>
 				<use
 					id='team2-7'
-					data-pos='start'
 					className='mal hippo team2'
 					x='-20'
 					y='-20'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='3'
 					href='#hippo3'></use>
 				<use
 					id='team2-8'
-					data-pos='start'
 					className='mal hippo team2'
 					x='-20'
 					y='-20'
 					width='24'
 					height='24'
+					data-pos='start'
+					data-num='4'
 					href='#hippo4'></use>
 				{teamNum >= 3 && (
 					<>
 						<use
 							id='team3-1'
-							data-pos='start'
 							className='mal dragon team3'
 							x='418'
 							y='166.32'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#dragon'></use>
 						<use
 							id='team3-2'
-							data-pos='start'
 							className='mal dragon team3'
 							x='458'
 							y='166.32'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#dragon'></use>
 						<use
 							id='team3-3'
-							data-pos='start'
 							className='mal dragon team3'
 							x='498'
 							y='166.32'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#dragon'></use>
 						<use
 							id='team3-4'
-							data-pos='start'
 							className='mal dragon team3'
 							x='538'
 							y='166.32'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#dragon'></use>
 						<use
 							id='team3-5'
-							data-pos='start'
 							className='mal dragon team3'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='2'
 							href='#dragon2'></use>
 						<use
 							id='team3-6'
-							data-pos='start'
 							className='mal dragon team3'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='2'
 							href='#dragon2'></use>
 						<use
 							id='team3-7'
-							data-pos='start'
 							className='mal dragon team3'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='3'
 							href='#dragon3'></use>
 						<use
 							id='team3-8'
-							data-pos='start'
 							className='mal dragon team3'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='4'
 							href='#dragon4'></use>
 					</>
 				)}
@@ -828,75 +942,83 @@ const GameBoard = () => {
 					<>
 						<use
 							id='team4-1'
-							data-pos='start'
 							className='mal cat team4'
 							x='418'
 							y='232.98'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#cat'></use>
 						<use
 							id='team4-2'
-							data-pos='start'
 							className='mal cat team4'
 							x='458'
 							y='232.98'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#cat'></use>
 						<use
 							id='team4-3'
-							data-pos='start'
 							className='mal cat team4'
 							x='498'
 							y='232.98'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#cat'></use>
 						<use
 							id='team4-4'
-							data-pos='start'
 							className='mal cat team4'
 							x='538'
 							y='232.98'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#cat'></use>
 						<use
 							id='team4-5'
-							data-pos='start'
 							className='mal cat team4'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='2'
 							href='#cat2'></use>
 						<use
 							id='team4-6'
-							data-pos='start'
 							className='mal cat team4'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='2'
 							href='#cat2'></use>
 						<use
 							id='team4-7'
-							data-pos='start'
 							className='mal cat team4'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='4'
 							href='#cat3'></use>
 						<use
 							id='team4-8'
-							data-pos='start'
 							className='mal cat team4'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='4'
 							href='#cat4'></use>
 					</>
 				)}
@@ -904,75 +1026,83 @@ const GameBoard = () => {
 					<>
 						<use
 							id='team5-1'
-							data-pos='start'
 							className='mal horse team5'
 							x='418'
 							y='299.64'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#horse'></use>
 						<use
 							id='team5-2'
-							data-pos='start'
 							className='mal horse team5'
 							x='458'
 							y='299.64'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#horse'></use>
 						<use
 							id='team5-3'
-							data-pos='start'
 							className='mal horse team5'
 							x='498'
 							y='299.64'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#horse'></use>
 						<use
 							id='team5-4'
-							data-pos='start'
 							className='mal horse team5'
 							x='538'
 							y='299.64'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#horse'></use>
 						<use
 							id='team5-5'
-							data-pos='start'
 							className='mal horse team5'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='2'
 							href='#horse2'></use>
 						<use
 							id='team5-6'
-							data-pos='start'
 							className='mal horse team5'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='2'
 							href='#horse2'></use>
 						<use
 							id='team5-7'
-							data-pos='start'
 							className='mal horse team5'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='3'
 							href='#horse3'></use>
 						<use
 							id='team5-8'
-							data-pos='start'
 							className='mal horse team5'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='4'
 							href='#horse4'></use>
 					</>
 				)}
@@ -980,75 +1110,83 @@ const GameBoard = () => {
 					<>
 						<use
 							id='team6-1'
-							data-pos='start'
 							className='mal fish team6'
 							x='418'
 							y='366.3'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#fish'></use>
 						<use
 							id='team6-2'
-							data-pos='start'
 							className='mal fish team6'
 							x='458'
 							y='366.3'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#fish'></use>
 						<use
 							id='team6-3'
-							data-pos='start'
 							className='mal fish team6'
 							x='498'
 							y='366.3'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#fish'></use>
 						<use
 							id='team6-4'
-							data-pos='start'
 							className='mal fish team6'
 							x='538'
 							y='366.3'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='1'
 							href='#fish'></use>
 						<use
 							id='team6-5'
-							data-pos='start'
 							className='mal fish team6'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='2'
 							href='#fish2'></use>
 						<use
 							id='team6-6'
-							data-pos='start'
 							className='mal fish team6'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='2'
 							href='#fish2'></use>
 						<use
 							id='team6-7'
-							data-pos='start'
 							className='mal fish team6'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='3'
 							href='#fish3'></use>
 						<use
 							id='team6-8'
-							data-pos='start'
 							className='mal fish team6'
 							x='-20'
 							y='-20'
 							width='24'
 							height='24'
+							data-pos='start'
+							data-num='4'
 							href='#fish4'></use>
 					</>
 				)}

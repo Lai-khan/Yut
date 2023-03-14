@@ -236,6 +236,9 @@ const GameBoard = () => {
 
 				checkCatch(nextPos)
 					.then(() => checkJoin(id, nextPos))
+					.then(async (result) => {
+						if (result.run) await join(result.id1, result.id2, result.posId);
+					})
 					.then(checkPass)
 					.then(saveHistory);
 			}
@@ -309,7 +312,7 @@ const GameBoard = () => {
 	};
 
 	// 말 업기
-	const checkJoin = (id, posId) => {
+	const checkJoin = async (id, posId) => {
 		if (posId === 'start') {
 			return;
 		}
@@ -323,10 +326,11 @@ const GameBoard = () => {
 
 			const mal = document.getElementById(pieces[i].id);
 			if (mal.dataset.pos === posId && mal.classList.contains(currentTurn)) {
-				join(id, pieces[i].id, posId);
-				return;
+				return { run: true, id1: id, id2: pieces[i].id, posId };
 			}
 		}
+
+		return { run: false };
 	};
 
 	const join = async (id1, id2, posId) => {

@@ -17,7 +17,7 @@
 	"bugs": {
 		"url": "https://github.com/Lai-khan/Yut/issues"
 	},
-	"homepage": "https://main--korean-yut.netlify.app/",
+	"homepage": "https://korean-yut.netlify.app/",
 	"dependencies": {
 		"@emotion/react": "^11.10.6",
 		"@emotion/styled": "^11.10.6",

@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SVG } from '@svgdotjs/svg.js';
 import '@svgdotjs/svg.draggable.js';
 import { Box, Button } from '@mui/material';
@@ -14,6 +14,7 @@ let startPos = new Map();
 
 const GameBoard = () => {
 	const teamNum = localStorage.getItem('teamNum');
+	const [currentTurn, setCurrentTurn] = useState('team1');
 	const [canPass, setCanPass] = useState(false);
 	const [passableId, setPassableId] = useState();
 	const [gameEnd, setGameEnd] = useState(false);
@@ -161,8 +162,6 @@ const GameBoard = () => {
 	useEffect(() => {
 		setGame();
 
-		iterateTeamMal(currentTurn, setDraggable);
-
 		window.addEventListener('beforeunload', preventClose);
 
 		return () => {
@@ -235,11 +234,13 @@ const GameBoard = () => {
 			if (posId !== nextPos) {
 				e.target.dataset.pos = nextPos;
 
-				checkCatch(nextPos);
-				checkJoin(id, nextPos);
-				checkPass();
-
-				setTimeout(() => saveHistory(), 100);
+				checkCatch(nextPos)
+					.then(() => checkJoin(id, nextPos))
+					.then(async (result) => {
+						if (result.run) await join(result.id1, result.id2, result.posId);
+					})
+					.then(checkPass)
+					.then(saveHistory);
 			}
 		});
 	};
@@ -259,19 +260,28 @@ const GameBoard = () => {
 	};
 
 	// 팀 로테이션
-	const nextTurn = async () => {
-		const next = teamRoster.get(currentTurn);
+	const nextTurn = () => {
+		(async () => {
+			const next = teamRoster.get(currentTurn);
 
-		iterateTeamMal(currentTurn, stopDraggable);
-		dispatch({ type: 'NEXT', nextTurn: next });
+			iterateTeamMal(currentTurn, stopDraggable);
+			setCurrentTurn(next);
 
-		const checkmark = SVG('#check');
-		const posY = checkmark.node.getAttribute('y');
-		checkmark.move(435, Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66);
+			const checkmark = SVG('#check');
+			const posY = checkmark.node.getAttribute('y');
+			checkmark.move(435, Number(posY) + 66.66 > 7 + 66.66 * (teamNum - 1) ? 7 : Number(posY) + 66.66);
+
+			return next;
+		})().then(saveHistory);
 	};
 
+	useEffect(() => {
+		iterateTeamMal(currentTurn, setDraggable);
+		checkPass();
+	}, [currentTurn]);
+
 	// 말 잡기
-	const checkCatch = (posId) => {
+	const checkCatch = async (posId) => {
 		const pieces = document.getElementsByClassName('mal');
 		const len = pieces.length;
 		for (var i = 0; i < len; i++) {
@@ -302,7 +312,7 @@ const GameBoard = () => {
 	};
 
 	// 말 업기
-	const checkJoin = (id, posId) => {
+	const checkJoin = async (id, posId) => {
 		if (posId === 'start') {
 			return;
 		}
@@ -316,10 +326,11 @@ const GameBoard = () => {
 
 			const mal = document.getElementById(pieces[i].id);
 			if (mal.dataset.pos === posId && mal.classList.contains(currentTurn)) {
-				join(id, pieces[i].id, posId);
-				return;
+				return { run: true, id1: id, id2: pieces[i].id, posId };
 			}
 		}
+
+		return { run: false };
 	};
 
 	const join = async (id1, id2, posId) => {
@@ -395,40 +406,44 @@ const GameBoard = () => {
 		setPassableId(undefined);
 	};
 
-	const pass = async () => {
-		if (passableId === undefined) {
-			return;
-		}
+	const pass = () => {
+		(async () => {
+			if (passableId === undefined) {
+				return;
+			}
 
-		const target = await SVG(`#${passableId}`);
-		const num = target.node.getAttribute('data-num');
-		let ids = [];
+			const target = await SVG(`#${passableId}`);
+			const num = target.node.getAttribute('data-num');
+			let ids = [];
 
-		if (Number(num) !== 1) {
-			ids = target.node.getAttribute('data-include').split(' ');
-			target.move(-20, -20);
-			target.removeClass(currentTurn);
-			target.draggable(false);
-		} else {
-			ids.push(passableId);
-		}
+			if (Number(num) !== 1) {
+				ids = target.node.getAttribute('data-include').split(' ');
+				target.move(-20, -20);
+				target.removeClass(currentTurn);
+				target.draggable(false);
+			} else {
+				ids.push(passableId);
+			}
 
-		ids.forEach(async (id) => {
-			const svg = await SVG(`#${id}`);
-			const startId = `start${id.replace('team', '')}`;
-			const start = await SVG(`#${startId}`);
-			const { x, y } = startPos.get(id);
+			const len = ids.length;
+			for (var i = 0; i < len; i++) {
+				const id = ids[i];
+				const svg = await SVG(`#${id}`);
+				const startId = `start${id.replace('team', '')}`;
+				const start = await SVG(`#${startId}`);
+				const { x, y } = startPos.get(id);
 
-			start.stroke({ color: '#2EFF2E', width: 3 });
-			svg.move(x, y);
-			svg.removeClass(currentTurn);
-			svg.draggable(false);
-		});
+				start.stroke({ color: '#2EFF2E', width: 3 });
+				svg.node.setAttribute('data-pos', 'start');
+				svg.move(x, y);
+				svg.removeClass(currentTurn);
+				svg.draggable(false);
+			}
 
-		setCanPass(false);
-
-		setTimeout(() => saveHistory(), 100);
-		setTimeout(() => checkVictory(), 100);
+			setCanPass(false);
+		})()
+			.then(saveHistory)
+			.then(checkVictory);
 	};
 
 	// 게임 승리 조건
@@ -436,11 +451,12 @@ const GameBoard = () => {
 		const pieces = Array.from(document.getElementsByClassName(currentTurn));
 		let isEnd = true;
 
-		pieces.forEach((piece) => {
-			if (piece.getAttribute('data-num') == 1) {
+		const len = pieces.length;
+		for (var i = 0; i < len; i++) {
+			if (pieces[i].getAttribute('data-num') == 1) {
 				isEnd = false;
 			}
-		});
+		}
 
 		if (isEnd) {
 			setGameEnd(true);
@@ -510,7 +526,7 @@ const GameBoard = () => {
 
 		if (currentTurn !== recent.currentTurn) {
 			iterateTeamMal(currentTurn, stopDraggable);
-			dispatch({ type: 'ROLLBACK', nextTurn: recent.currentTurn });
+			setCurrentTurn(recent.currentTurn);
 		}
 
 		const checkmark = SVG('#check');
@@ -547,18 +563,6 @@ const GameBoard = () => {
 
 		setHistory();
 	};
-
-	const [currentTurn, dispatch] = useReducer((state, action) => {
-		iterateTeamMal(action.nextTurn, setDraggable);
-		checkPass();
-		switch (action.type) {
-			case 'NEXT':
-				saveHistory(action.nextTurn);
-				return action.nextTurn;
-			case 'ROLLBACK':
-				return action.nextTurn;
-		}
-	}, 'team1');
 
 	return (
 		<div id='game'>

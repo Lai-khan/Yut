@@ -15,8 +15,6 @@ let startPos = new Map();
 const GameBoard = () => {
 	const teamNum = localStorage.getItem('teamNum');
 	const [currentTurn, setCurrentTurn] = useState('team1');
-	const [canPass, setCanPass] = useState(false);
-	const [passableId, setPassableId] = useState();
 	const [gameEnd, setGameEnd] = useState(false);
 	const [openHistoryAlert, setOpenHistoryAlert] = useState(false);
 	const [canRollback, setCanRollback] = useState(false);
@@ -35,11 +33,11 @@ const GameBoard = () => {
 		}
 
 		movableSpace.set('start', ['a1', 'a2', 'a3', 'a4', 'mo1']);
-		movableSpace.set('center', ['e2', 'e4', 'e7', 'e8', 'end']);
+		movableSpace.set('center', ['e2', 'e4', 'e7', 'e8', 'mo4', 'end']);
 		movableSpace.set('mo1', ['a4', 'e1', 'e2', 'center', 'e5', 'e6']);
 		movableSpace.set('mo2', ['b4', 'e3', 'e4', 'center', 'e7', 'e8']);
-		movableSpace.set('mo3', ['c4', 'e6', 'd1', 'd2', 'd3', 'd4', 'end']);
-		movableSpace.set('a1', ['end', 'a2', 'a3', 'a4', 'mo1', 'b1']);
+		movableSpace.set('mo3', ['c4', 'e6', 'd1', 'd2', 'd3', 'd4', 'mo4']);
+		movableSpace.set('a1', ['mo4', 'a2', 'a3', 'a4', 'mo1', 'b1']);
 		movableSpace.set('a2', ['a1', 'a3', 'a4', 'mo1', 'b1', 'b2']);
 		movableSpace.set('a3', ['a2', 'a4', 'mo1', 'b1', 'b2', 'b3']);
 		movableSpace.set('a4', ['a3', 'mo1', 'b1', 'b2', 'b3', 'b4']);
@@ -51,19 +49,19 @@ const GameBoard = () => {
 		movableSpace.set('c2', ['c1', 'c3', 'c4', 'mo3', 'd1', 'd2']);
 		movableSpace.set('c3', ['c2', 'c4', 'mo3', 'd1', 'd2', 'd3']);
 		movableSpace.set('c4', ['c3', 'mo3', 'd1', 'd2', 'd3', 'd4']);
-		movableSpace.set('d1', ['mo3', 'd2', 'd3', 'd4', 'end']);
-		movableSpace.set('d2', ['d1', 'd3', 'd4', 'end']);
-		movableSpace.set('d3', ['d2', 'd4', 'end']);
-		movableSpace.set('d4', ['d3', 'end']);
+		movableSpace.set('d1', ['mo3', 'd2', 'd3', 'd4', 'mo4', 'end']);
+		movableSpace.set('d2', ['d1', 'd3', 'd4', 'mo4', 'end']);
+		movableSpace.set('d3', ['d2', 'd4', 'mo4', 'end']);
+		movableSpace.set('d4', ['d3', 'mo4', 'end']);
 		movableSpace.set('e1', ['mo1', 'e2', 'center', 'e5', 'e6', 'mo3']);
 		movableSpace.set('e2', ['e1', 'center', 'e5', 'e6', 'mo3', 'd1']);
-		movableSpace.set('e3', ['mo2', 'e4', 'center', 'e7', 'e8', 'end']);
-		movableSpace.set('e4', ['e3', 'center', 'e7', 'e8', 'end']);
+		movableSpace.set('e3', ['mo2', 'e4', 'center', 'e7', 'e8', 'mo4']);
+		movableSpace.set('e4', ['e3', 'center', 'e7', 'e8', 'mo4', 'end']);
 		movableSpace.set('e5', ['center', 'e6', 'mo3', 'd1', 'd2', 'd3']);
 		movableSpace.set('e6', ['e5', 'mo3', 'd1', 'd2', 'd3', 'd4']);
-		movableSpace.set('e7', ['center', 'e8', 'end']);
-		movableSpace.set('e8', ['e7', 'end']);
-		movableSpace.set('end', ['d4', 'e8']);
+		movableSpace.set('e7', ['center', 'e8', 'mo4', 'end']);
+		movableSpace.set('e8', ['e7', 'mo4', 'end']);
+		movableSpace.set('mo4', ['d4', 'e8', 'end']);
 
 		spaceInfo.set('center', { minX: 164, minY: 164, maxX: 212, maxY: 212, sx: 188, sy: 188 });
 		spaceInfo.set('mo1', { minX: 309, minY: 309, maxX: 357, maxY: 357, sx: 333, sy: 333 });
@@ -93,7 +91,8 @@ const GameBoard = () => {
 		spaceInfo.set('e6', { minX: 69, minY: 69, maxX: 117, maxY: 117, sx: 93, sy: 93 });
 		spaceInfo.set('e7', { minX: 114, minY: 214, maxX: 162, maxY: 262, sx: 138, sy: 238 });
 		spaceInfo.set('e8', { minX: 69, minY: 259, maxX: 117, maxY: 307, sx: 93, sy: 283 });
-		spaceInfo.set('end', { minX: 19, minY: 309, maxX: 67, maxY: 357, sx: 43, sy: 333 });
+		spaceInfo.set('mo4', { minX: 19, minY: 309, maxX: 67, maxY: 357, sx: 43, sy: 333 });
+		spaceInfo.set('end', { minX: 168, minY: 253, maxX: 232, maxY: 322, sx: 188, sy: 285 });
 
 		startPos.set('team1-1', { x: 418, y: 33 });
 		startPos.set('team1-2', { x: 458, y: 33 });
@@ -205,6 +204,12 @@ const GameBoard = () => {
 	const setDraggable = async (id) => {
 		const element = await SVG(`#${id}`);
 
+		if (element.node.classList.value.includes('out')) {
+			return;
+		}
+
+		await element.off('dragstart');
+		await element.off('dragend');
 		element.draggable();
 
 		element.on('dragstart', (e) => {
@@ -231,15 +236,18 @@ const GameBoard = () => {
 			const { sx, sy, nextPos } = malMove(id, posId, box.x, box.y);
 			handler.move(sx, sy);
 
-			if (posId !== nextPos) {
+			if (nextPos === 'end') {
+				pass(id);
+			} else {
 				e.target.dataset.pos = nextPos;
+			}
 
+			if (posId !== nextPos) {
 				checkCatch(nextPos)
 					.then(() => checkJoin(id, nextPos))
 					.then(async (result) => {
 						if (result.run) await join(result.id1, result.id2, result.posId);
 					})
-					.then(checkPass)
 					.then(saveHistory);
 			}
 		});
@@ -277,7 +285,6 @@ const GameBoard = () => {
 
 	useEffect(() => {
 		iterateTeamMal(currentTurn, setDraggable);
-		checkPass();
 	}, [currentTurn]);
 
 	// 말 잡기
@@ -375,7 +382,9 @@ const GameBoard = () => {
 		const svg1 = await SVG(`#${id1}`);
 		const svg2 = await SVG(`#${id2}`);
 		svg1.node.setAttribute('data-pos', 'start');
+		svg1.node.removeAttribute('data-include');
 		svg2.node.setAttribute('data-pos', 'start');
+		svg2.node.removeAttribute('data-include');
 		svg1.move(-20, -20);
 		svg2.move(-20, -20);
 	};
@@ -391,38 +400,17 @@ const GameBoard = () => {
 	};
 
 	// 말 나기
-	const checkPass = () => {
-		const pieces = document.getElementsByClassName(currentTurn);
-		const len = pieces.length;
-		for (var i = 0; i < len; i++) {
-			const mal = document.getElementById(pieces[i].id);
-			if (mal.getAttribute('data-pos') === 'end') {
-				setCanPass(true);
-				setPassableId(pieces[i].id);
-				return;
-			}
-		}
-		setCanPass(false);
-		setPassableId(undefined);
-	};
-
-	const pass = () => {
+	const pass = (id) => {
 		(async () => {
-			if (passableId === undefined) {
-				return;
-			}
-
-			const target = await SVG(`#${passableId}`);
+			const target = await SVG(`#${id}`);
 			const num = target.node.getAttribute('data-num');
 			let ids = [];
 
 			if (Number(num) !== 1) {
 				ids = target.node.getAttribute('data-include').split(' ');
 				target.move(-20, -20);
-				target.removeClass(currentTurn);
-				target.draggable(false);
 			} else {
-				ids.push(passableId);
+				ids.push(id);
 			}
 
 			const len = ids.length;
@@ -436,14 +424,10 @@ const GameBoard = () => {
 				start.stroke({ color: '#2EFF2E', width: 3 });
 				svg.node.setAttribute('data-pos', 'start');
 				svg.move(x, y);
-				svg.removeClass(currentTurn);
+				svg.addClass('out');
 				svg.draggable(false);
 			}
-
-			setCanPass(false);
-		})()
-			.then(saveHistory)
-			.then(checkVictory);
+		})().then(checkVictory);
 	};
 
 	// 게임 승리 조건
@@ -460,6 +444,7 @@ const GameBoard = () => {
 
 		if (isEnd) {
 			setGameEnd(true);
+			localStorage.removeItem('history');
 		}
 	};
 
@@ -492,6 +477,7 @@ const GameBoard = () => {
 			history.pieces.push({
 				id: pieces[i].id,
 				dataPos: mal.getAttribute('data-pos'),
+				dataInclude: mal.getAttribute('data-include'),
 				classList: mal.classList.value,
 				x: mal.getAttribute('x'),
 				y: mal.getAttribute('y'),
@@ -537,8 +523,15 @@ const GameBoard = () => {
 		const len1 = pieces.length;
 		for (var i = 0; i < len1; i++) {
 			const mal = document.getElementById(pieces[i].id);
-			mal.setAttribute('data-pos', pieces[i].dataPos);
+
+			if (mal.classList.value.includes('out') && !pieces[i].classList.includes('out')) {
+				setDraggable(pieces[i].id);
+			}
 			mal.classList = pieces[i].classList;
+			mal.setAttribute('data-pos', pieces[i].dataPos);
+			if (pieces[i].dataInclude) {
+				mal.setAttribute('data-include', pieces[i].dataInclude);
+			}
 			SVG(`#${pieces[i].id}`).move(pieces[i].x, pieces[i].y);
 		}
 
@@ -571,6 +564,10 @@ const GameBoard = () => {
 				<rect x='10' y='10' width='380' height='380' stroke='black' fill='none' strokeWidth='4' />
 				<line x1='0' y1='0' x2='0' y2='400' stroke='black' strokeWidth='1' />
 
+				{/* 출구 */}
+				<rect id='end' x='180' y='265' width='40' height='45' stroke='black' fill='none' strokeWidth='1.2' />
+				<image x='188' y='265' width='25' height='25' href='./images/exit.png' />
+
 				{/* 윷놀이 칸 - 모서리&중앙 */}
 				{/* 중앙 */}
 				<circle cx='200' cy='200' r='20' stroke='black' strokeWidth='3' fill='none' />
@@ -583,7 +580,7 @@ const GameBoard = () => {
 				<circle id='mo2' cx='345' cy='55' r='12' stroke='black' strokeWidth='1.5' fill='none' />
 				{/* 좌하 */}
 				<circle cx='55' cy='345' r='20' stroke='black' strokeWidth='3' fill='none' />
-				<circle id='end' cx='55' cy='345' r='12' stroke='black' strokeWidth='1.5' fill='none' />
+				<circle id='mo4' cx='55' cy='345' r='12' stroke='black' strokeWidth='1.5' fill='none' />
 				{/* 우하 */}
 				<circle cx='345' cy='345' r='20' stroke='black' strokeWidth='3' fill='none' />
 				<circle id='mo1' cx='345' cy='345' r='12' stroke='black' strokeWidth='1.5' fill='none' />
@@ -1563,15 +1560,6 @@ const GameBoard = () => {
 				<Button id='nextTurn' variant='contained' color='primary' size='large' onClick={nextTurn}>
 					다음턴
 				</Button>
-				{canPass ? (
-					<Button variant='contained' color='success' size='large' onClick={pass}>
-						나기
-					</Button>
-				) : (
-					<Button variant='contained' color='success' size='large' disabled>
-						나기
-					</Button>
-				)}
 				{canRollback ? (
 					<Button id='rollback' variant='contained' color='error' size='large' onClick={rollback}>
 						무르기

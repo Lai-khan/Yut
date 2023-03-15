@@ -204,6 +204,12 @@ const GameBoard = () => {
 	const setDraggable = async (id) => {
 		const element = await SVG(`#${id}`);
 
+		if (element.node.classList.value.includes('out')) {
+			return;
+		}
+
+		await element.off('dragstart');
+		await element.off('dragend');
 		element.draggable();
 
 		element.on('dragstart', (e) => {
@@ -403,8 +409,6 @@ const GameBoard = () => {
 			if (Number(num) !== 1) {
 				ids = target.node.getAttribute('data-include').split(' ');
 				target.move(-20, -20);
-				target.removeClass(currentTurn);
-				target.draggable(false);
 			} else {
 				ids.push(id);
 			}
@@ -420,7 +424,7 @@ const GameBoard = () => {
 				start.stroke({ color: '#2EFF2E', width: 3 });
 				svg.node.setAttribute('data-pos', 'start');
 				svg.move(x, y);
-				svg.removeClass(currentTurn);
+				svg.addClass('out');
 				svg.draggable(false);
 			}
 		})().then(checkVictory);
@@ -519,6 +523,10 @@ const GameBoard = () => {
 		const len1 = pieces.length;
 		for (var i = 0; i < len1; i++) {
 			const mal = document.getElementById(pieces[i].id);
+
+			if (mal.classList.value.includes('out') && !pieces[i].classList.includes('out')) {
+				setDraggable(pieces[i].id);
+			}
 			mal.classList = pieces[i].classList;
 			mal.setAttribute('data-pos', pieces[i].dataPos);
 			if (pieces[i].dataInclude) {

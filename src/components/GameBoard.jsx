@@ -238,11 +238,9 @@ const GameBoard = () => {
 
 			if (nextPos === 'end') {
 				pass(id);
-			} else {
+			} else if (posId !== nextPos) {
 				e.target.dataset.pos = nextPos;
-			}
 
-			if (posId !== nextPos) {
 				checkCatch(nextPos)
 					.then(() => checkJoin(id, nextPos))
 					.then(async (result) => {
@@ -409,6 +407,8 @@ const GameBoard = () => {
 			if (Number(num) !== 1) {
 				ids = target.node.getAttribute('data-include').split(' ');
 				target.move(-20, -20);
+				target.node.setAttribute('data-pos', 'start');
+				target.node.removeAttribute('data-include');
 			} else {
 				ids.push(id);
 			}
@@ -427,22 +427,24 @@ const GameBoard = () => {
 				svg.addClass('out');
 				svg.draggable(false);
 			}
-		})().then(checkVictory);
+		})()
+			.then(saveHistory)
+			.then(checkVictory);
 	};
 
 	// 게임 승리 조건
 	const checkVictory = () => {
 		const pieces = Array.from(document.getElementsByClassName(currentTurn));
-		let isEnd = true;
+		let endPiece = 0;
 
 		const len = pieces.length;
 		for (var i = 0; i < len; i++) {
-			if (pieces[i].getAttribute('data-num') == 1) {
-				isEnd = false;
+			if (pieces[i].classList.contains('out')) {
+				endPiece++;
 			}
 		}
 
-		if (isEnd) {
+		if (endPiece == 4) {
 			setGameEnd(true);
 			localStorage.removeItem('history');
 		}
@@ -524,7 +526,7 @@ const GameBoard = () => {
 		for (var i = 0; i < len1; i++) {
 			const mal = document.getElementById(pieces[i].id);
 
-			if (mal.classList.value.includes('out') && !pieces[i].classList.includes('out')) {
+			if (mal.classList.contains('out') && !pieces[i].classList.includes('out')) {
 				setDraggable(pieces[i].id);
 			}
 			mal.classList = pieces[i].classList;

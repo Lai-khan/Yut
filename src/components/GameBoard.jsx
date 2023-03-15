@@ -232,11 +232,11 @@ const GameBoard = () => {
 
 			if (nextPos === 'end') {
 				pass(id);
+			} else {
+				e.target.dataset.pos = nextPos;
 			}
 
 			if (posId !== nextPos) {
-				e.target.dataset.pos = nextPos;
-
 				checkCatch(nextPos)
 					.then(() => checkJoin(id, nextPos))
 					.then(async (result) => {
@@ -376,7 +376,9 @@ const GameBoard = () => {
 		const svg1 = await SVG(`#${id1}`);
 		const svg2 = await SVG(`#${id2}`);
 		svg1.node.setAttribute('data-pos', 'start');
+		svg1.node.removeAttribute('data-include');
 		svg2.node.setAttribute('data-pos', 'start');
+		svg2.node.removeAttribute('data-include');
 		svg1.move(-20, -20);
 		svg2.move(-20, -20);
 	};
@@ -438,6 +440,7 @@ const GameBoard = () => {
 
 		if (isEnd) {
 			setGameEnd(true);
+			localStorage.removeItem('history');
 		}
 	};
 
@@ -470,6 +473,7 @@ const GameBoard = () => {
 			history.pieces.push({
 				id: pieces[i].id,
 				dataPos: mal.getAttribute('data-pos'),
+				dataInclude: mal.getAttribute('data-include'),
 				classList: mal.classList.value,
 				x: mal.getAttribute('x'),
 				y: mal.getAttribute('y'),
@@ -515,8 +519,11 @@ const GameBoard = () => {
 		const len1 = pieces.length;
 		for (var i = 0; i < len1; i++) {
 			const mal = document.getElementById(pieces[i].id);
-			mal.setAttribute('data-pos', pieces[i].dataPos);
 			mal.classList = pieces[i].classList;
+			mal.setAttribute('data-pos', pieces[i].dataPos);
+			if (pieces[i].dataInclude) {
+				mal.setAttribute('data-include', pieces[i].dataInclude);
+			}
 			SVG(`#${pieces[i].id}`).move(pieces[i].x, pieces[i].y);
 		}
 

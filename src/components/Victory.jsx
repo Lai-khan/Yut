@@ -17,7 +17,6 @@ const Victory = ({ teamName }) => {
 				<DialogActions>
 					<Button
 						onClick={() => {
-							localStorage.removeItem('history');
 							location.href = '/';
 						}}
 						autoFocus>
